@@ -9,9 +9,6 @@ public class DatabaseConnection {
     private static DatabaseConnection instance;
     private Connection connection;
 
-    // TODO: replace placeholder values with actual database credentials.
-    //       Do NOT hardcode real credentials here — use environment variables
-    //       or an external configuration file that is excluded from version control.
     private static final String URL = "jdbc:mysql://localhost:3306/gymmanagement";
     private static final String USER = "root";
     private static final String PASSWORD = "password";
