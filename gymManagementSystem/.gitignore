@@ -1,0 +1,18 @@
+# IntelliJ IDEA — ignore auto-generated per-developer IDE files
+# Note: gymmanagement.iml is intentionally tracked as the project module descriptor
+*.iml
+!gymmanagement.iml
+.idea/
+
+# Compiled output
+out/
+*.class
+
+# Build artifacts
+*.jar
+*.war
+*.ear
+
+# OS files
+.DS_Store
+Thumbs.db
