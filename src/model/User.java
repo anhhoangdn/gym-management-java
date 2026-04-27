@@ -11,12 +11,24 @@ public abstract class User {
     private int type;
 
     public User() {
-        // TODO: initialize default values if needed
+        this.id = 0;
+        this.firstName = "";
+        this.lastName = "";
+        this.email = "";
+        this.phoneNumber = "";
+        this.password = "";
+        this.type = 1;
     }
 
     public User(int id, String firstName, String lastName, String email,
                 String phoneNumber, String password, int type) {
-        // TODO: assign fields
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.password = password;
+        this.type = type;
     }
 
     // Getters and Setters
@@ -94,4 +106,16 @@ public abstract class User {
     // Abstract Methods
 
     public abstract void showList();
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", type=" + type +
+                '}';
+    }
 }

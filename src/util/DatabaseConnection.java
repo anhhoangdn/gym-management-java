@@ -1,36 +1,96 @@
 package util;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DatabaseConnection {
 
-    private static DatabaseConnection instance;
-    private Connection connection;
-
-    private static final String URL = "jdbc:mysql://localhost:3306/gymmanagement";
-    private static final String USER = "root";
-    private static final String PASSWORD = "password";
+    private static final String DEFAULT_DRIVER = "com.mysql.cj.jdbc.Driver";
 
     private DatabaseConnection() {
-        // TODO: establish JDBC connection using URL, USER, PASSWORD
     }
 
-    public static synchronized DatabaseConnection getInstance() {
-        // TODO: return the existing instance or create a new one (thread-safe Singleton)
-        if (instance == null) {
-            instance = new DatabaseConnection();
+    public static Connection getConnection() throws SQLException {
+        Map<String, String> envValues = loadEnvFile();
+        String driver = resolveSetting("DB_DRIVER", envValues, DEFAULT_DRIVER);
+        String url = requireSetting("DB_URL", envValues);
+        String user = requireSetting("DB_USER", envValues);
+        String password = requireSetting("DB_PASSWORD", envValues);
+
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("JDBC driver not found: " + driver, e);
         }
-        return instance;
+
+        if (user == null || user.trim().isEmpty()) {
+            return DriverManager.getConnection(url);
+        }
+
+        return DriverManager.getConnection(url, user, password);
     }
 
-    public Connection getConnection() {
-        // TODO: return the active database connection
-        return connection;
+    private static String resolveSetting(String key, Map<String, String> envValues, String fallback) {
+        String fromSystemEnv = System.getenv(key);
+        if (fromSystemEnv != null && !fromSystemEnv.trim().isEmpty()) {
+            return fromSystemEnv.trim();
+        }
+        String fromEnvFile = envValues.get(key);
+        if (fromEnvFile != null && !fromEnvFile.trim().isEmpty()) {
+            return fromEnvFile.trim();
+        }
+        return fallback;
     }
 
-    public void closeConnection() {
-        // TODO: close the database connection if open
+    private static String requireSetting(String key, Map<String, String> envValues) {
+        String fromSystemEnv = System.getenv(key);
+        if (fromSystemEnv != null && !fromSystemEnv.trim().isEmpty()) {
+            return fromSystemEnv.trim();
+        }
+
+        String fromEnvFile = envValues.get(key);
+        if (fromEnvFile != null && !fromEnvFile.trim().isEmpty()) {
+            return fromEnvFile.trim();
+        }
+
+        throw new IllegalStateException("Missing required database setting: " + key + " in .env or system environment.");
+    }
+
+    private static Map<String, String> loadEnvFile() {
+        Map<String, String> values = new HashMap<>();
+        Path envPath = Paths.get(".env");
+
+        if (!Files.exists(envPath)) {
+            return values;
+        }
+
+        try {
+            List<String> lines = Files.readAllLines(envPath);
+            for (String line : lines) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+                    continue;
+                }
+                int idx = trimmed.indexOf('=');
+                if (idx <= 0) {
+                    continue;
+                }
+                String key = trimmed.substring(0, idx).trim();
+                String value = trimmed.substring(idx + 1).trim();
+                values.put(key, value);
+            }
+        } catch (IOException ignored) {
+            // Fallback to defaults/system env when .env cannot be parsed.
+        }
+
+        return values;
     }
 }
