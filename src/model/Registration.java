@@ -13,12 +13,24 @@ public class Registration {
     private int status;
 
     public Registration() {
-        // TODO: initialize default values if needed
+        this.id = 0;
+        this.userId = 0;
+        this.packageId = 0;
+        this.startDate = null;
+        this.endDate = null;
+        this.total = 0.0;
+        this.status = 1;
     }
 
     public Registration(int id, int userId, int packageId, Date startDate,
                         Date endDate, double total, int status) {
-        // TODO: assign fields
+        this.id = id;
+        this.userId = userId;
+        this.packageId = packageId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.total = total;
+        this.status = status;
     }
 
     // Getters and Setters
@@ -91,5 +103,22 @@ public class Registration {
     public void setStatus(int status) {
         // TODO: set status
         this.status = status;
+    }
+
+    public String getStatusLabel() {
+        return status == 1 ? "ACTIVE" : "CANCELLED";
+    }
+
+    @Override
+    public String toString() {
+        return "Registration{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", packageId=" + packageId +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", total=" + total +
+                ", status=" + getStatusLabel() +
+                '}';
     }
 }

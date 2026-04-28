@@ -10,12 +10,22 @@ public class Package {
     private int status;
 
     public Package() {
-        // TODO: initialize default values if needed
+        this.id = 0;
+        this.packageName = "";
+        this.duration = 0;
+        this.price = 0.0;
+        this.description = "";
+        this.status = 1;
     }
 
     public Package(int id, String packageName, int duration, double price,
                    String description, int status) {
-        // TODO: assign fields
+        this.id = id;
+        this.packageName = packageName;
+        this.duration = duration;
+        this.price = price;
+        this.description = description;
+        this.status = status;
     }
 
     // Getters and Setters
@@ -78,5 +88,21 @@ public class Package {
     public void setStatus(int status) {
         // TODO: set status
         this.status = status;
+    }
+
+    public String getStatusLabel() {
+        return status == 1 ? "ACTIVE" : "INACTIVE";
+    }
+
+    @Override
+    public String toString() {
+        return "Package{" +
+                "id=" + id +
+                ", packageName='" + packageName + '\'' +
+                ", duration=" + duration +
+                ", price=" + price +
+                ", description='" + description + '\'' +
+                ", status=" + getStatusLabel() +
+                '}';
     }
 }
