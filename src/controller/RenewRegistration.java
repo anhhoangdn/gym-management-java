@@ -46,6 +46,11 @@ public class RenewRegistration implements Operation {
                 return;
             }
 
+            if (registration.getEndDate() == null) {
+                view.showError("Đăng ký thiếu ngày kết thúc, không thể gia hạn.");
+                return;
+            }
+
             LocalDate currentEndDate = toLocalDate(registration.getEndDate());
             LocalDate newEndDate = currentEndDate.plusMonths(gymPackage.getDuration());
             double newTotal = registration.getTotal() + gymPackage.getPrice();
@@ -61,9 +66,6 @@ public class RenewRegistration implements Operation {
     }
 
     private LocalDate toLocalDate(java.util.Date date) {
-        if (date == null) {
-            return LocalDate.now();
-        }
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 }

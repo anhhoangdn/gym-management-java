@@ -138,7 +138,9 @@ public class Main {
     }
 
     private String formatAdminName(Admin admin) {
-        String name = (admin.getFirstName() + " " + admin.getLastName()).trim();
+        String firstName = admin.getFirstName() != null ? admin.getFirstName() : "";
+        String lastName = admin.getLastName() != null ? admin.getLastName() : "";
+        String name = (firstName + " " + lastName).trim();
         if (name.isEmpty()) {
             return admin.getEmail();
         }
