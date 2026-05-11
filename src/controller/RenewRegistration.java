@@ -52,7 +52,8 @@ public class RenewRegistration implements Operation {
             }
 
             LocalDate currentEndDate = toLocalDate(registration.getEndDate());
-            LocalDate newEndDate = currentEndDate.plusMonths(gymPackage.getDuration());
+            LocalDate baseDate = currentEndDate.isBefore(LocalDate.now()) ? LocalDate.now() : currentEndDate;
+            LocalDate newEndDate = baseDate.plusMonths(gymPackage.getDuration());
             double newTotal = registration.getTotal() + gymPackage.getPrice();
 
             boolean success = registrationRepo.renewRegistration(registrationId, java.sql.Date.valueOf(newEndDate), newTotal);

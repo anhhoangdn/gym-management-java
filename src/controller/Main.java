@@ -1,6 +1,7 @@
 package controller;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import javax.swing.JPasswordField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -37,7 +38,7 @@ public class Main {
     private boolean verifyDatabaseConnection() {
         try (Connection con = DatabaseConnection.getConnection()) {
             return true;
-        } catch (Exception ex) {
+        } catch (SQLException | RuntimeException ex) {
             showError("Không thể kết nối cơ sở dữ liệu. Vui lòng kiểm tra .env và cấu hình DB.\n" + ex.getMessage());
             return false;
         }

@@ -3,7 +3,6 @@ package controller;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import model.Member;
 import model.Package;
 import model.Registration;
 import model.User;
@@ -57,7 +56,7 @@ public class AddNewRegistration implements Operation {
 
             int userId = Integer.parseInt(userIdStr);
             User user = userRepo.findById(userId);
-            if (user == null || !(user instanceof Member)) {
+            if (user == null || user.getType() != 1) {
                 view.showError("Không tìm thấy hội viên với ID = " + userId);
                 return;
             }
