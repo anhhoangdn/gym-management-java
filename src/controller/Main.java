@@ -37,6 +37,10 @@ public class Main {
 
     private boolean verifyDatabaseConnection() {
         try (Connection con = DatabaseConnection.getConnection()) {
+            if (!con.isValid(2)) {
+                showError("Kết nối cơ sở dữ liệu không hợp lệ. Vui lòng kiểm tra cấu hình DB.");
+                return false;
+            }
             return true;
         } catch (SQLException | RuntimeException ex) {
             showError("Không thể kết nối cơ sở dữ liệu. Vui lòng kiểm tra .env và cấu hình DB.\n" + ex.getMessage());

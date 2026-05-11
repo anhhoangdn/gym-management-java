@@ -71,6 +71,10 @@ public class AddNewRegistration implements Operation {
                 view.showError("Gói tập này đang không hoạt động.");
                 return;
             }
+            if (gymPackage.getDuration() <= 0) {
+                view.showError("Thời hạn gói tập không hợp lệ.");
+                return;
+            }
 
             LocalDate endDate = startDate.plusMonths(gymPackage.getDuration());
             Registration registration = new Registration(

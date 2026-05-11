@@ -45,6 +45,10 @@ public class RenewRegistration implements Operation {
                 view.showError("Không tìm thấy gói tập cho đăng ký này.");
                 return;
             }
+            if (gymPackage.getDuration() <= 0) {
+                view.showError("Thời hạn gói tập không hợp lệ.");
+                return;
+            }
 
             if (registration.getEndDate() == null) {
                 view.showError("Đăng ký thiếu ngày kết thúc, không thể gia hạn.");
