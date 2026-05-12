@@ -70,7 +70,7 @@ public class RegistrationView extends JFrame {
                 searchPanel.setOpaque(false);
                 searchPanel.add(UiTheme.createLabel("ID Hội viên:"));
                 txtUserId  = UiTheme.createTextField();
-                txtUserId.setColumns(12);
+                txtUserId.setColumns(UiTheme.TEXTFIELD_COLUMNS_SMALL);
                 btnConfirm = UiTheme.createPrimaryButton("Tìm");
                 searchPanel.add(txtUserId);
                 searchPanel.add(btnConfirm);
