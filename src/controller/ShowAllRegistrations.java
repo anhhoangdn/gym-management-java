@@ -1,9 +1,7 @@
 package controller;
 
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import model.Registration;
 import repository.RegistrationRepository;
 import repository.UserRepository;
@@ -30,12 +28,11 @@ public class ShowAllRegistrations implements Operation {
 
         List<Registration> list = regRepo.findAll();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Map<Integer, String> memberLabels = new HashMap<>();
 
         for (Registration reg : list) {
-            String memberLabel = memberLabels.computeIfAbsent(
-                reg.getUserId(),
-                userId -> UserDisplayHelper.buildMemberLabel(userRepo.findById(userId), userId)
+            String memberLabel = UserDisplayHelper.buildMemberLabel(
+                userRepo.findById(reg.getUserId()),
+                reg.getUserId()
             );
             Object[] row = {
                 reg.getId(),
