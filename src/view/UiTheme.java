@@ -100,7 +100,7 @@ public final class UiTheme {
 
     public static JLabel createSectionLabel(String text) {
         JLabel label = new JLabel(text);
-        label.setFont(new Font("SansSerif", Font.BOLD, 12));
+        label.setFont(FONT_TABLE_HEADER);
         label.setForeground(TEXT_MUTED);
         return label;
     }

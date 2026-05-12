@@ -57,6 +57,7 @@ public class RegistrationView extends JFrame {
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
         headerPanel.setOpaque(false);
         headerPanel.add(UiTheme.createHeaderPanel(title, buildSubtitle(mode)));
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
 
         switch (mode) {
             case "all":
@@ -96,7 +97,6 @@ public class RegistrationView extends JFrame {
                 break;
         }
 
-        mainPanel.add(headerPanel, BorderLayout.NORTH);
         add(mainPanel);
     }
 
