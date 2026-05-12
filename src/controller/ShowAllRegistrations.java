@@ -30,9 +30,10 @@ public class ShowAllRegistrations implements Operation {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         for (Registration reg : list) {
+            int userId = reg.getUserId();
             String memberLabel = UserDisplayHelper.buildMemberLabel(
-                userRepo.findById(reg.getUserId()),
-                reg.getUserId()
+                userRepo.findById(userId),
+                userId
             );
             Object[] row = {
                 reg.getId(),
