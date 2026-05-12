@@ -2,18 +2,15 @@ package controller;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.swing.JPasswordField;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import java.awt.GridLayout;
 import model.Admin;
 import repository.PackageRepository;
 import repository.RegistrationRepository;
 import repository.UserRepository;
+import view.LoginView;
 import view.MenuView;
+import view.SignUpView;
 import util.DatabaseConnection;
 import util.InputValidator;
 
@@ -49,30 +46,103 @@ public class Main {
     }
 
     private void showLogin(UserRepository userRepo, PackageRepository packageRepo, RegistrationRepository registrationRepo) {
-        while (true) {
-            Credentials credentials = promptLogin();
-            if (credentials == null) {
-                System.exit(0);
-                return;
-            }
+        LoginView loginView = new LoginView();
 
-            if (!InputValidator.validateEmail(credentials.email)) {
-                showError("Email không hợp lệ.");
-                continue;
-            }
-            if (!InputValidator.validateString(credentials.password)) {
-                showError("Mật khẩu không được để trống.");
-                continue;
-            }
+        loginView.getBtnLogin().addActionListener(
+                e -> handleLogin(loginView, userRepo, packageRepo, registrationRepo));
+        loginView.getBtnRegister().addActionListener(e -> openRegistration(loginView, userRepo));
 
-            Admin admin = userRepo.authenticateAdmin(credentials.email, credentials.password);
-            if (admin == null) {
-                showError("Sai email hoặc mật khẩu admin.");
-                continue;
-            }
+        loginView.setVisible(true);
+    }
 
-            openMenu(admin, userRepo, packageRepo, registrationRepo);
+    private void handleLogin(LoginView loginView, UserRepository userRepo,
+                             PackageRepository packageRepo, RegistrationRepository registrationRepo) {
+        String email = loginView.getEmail();
+        String password = loginView.getPassword();
+
+        if (!InputValidator.validateEmail(email)) {
+            loginView.showError("Email không hợp lệ.");
             return;
+        }
+        if (!InputValidator.validateString(password)) {
+            loginView.showError("Mật khẩu không được để trống.");
+            return;
+        }
+
+        Admin admin = userRepo.authenticateAdmin(email, password);
+        if (admin == null) {
+            loginView.showError("Sai email hoặc mật khẩu admin.");
+            return;
+        }
+
+        loginView.dispose();
+        openMenu(admin, userRepo, packageRepo, registrationRepo);
+    }
+
+    private void openRegistration(LoginView loginView, UserRepository userRepo) {
+        SignUpView signUpView = new SignUpView();
+
+        signUpView.getBtnCancel().addActionListener(e -> signUpView.dispose());
+        signUpView.getBtnConfirm().addActionListener(
+                e -> handleRegistration(signUpView, loginView, userRepo));
+
+        signUpView.setVisible(true);
+    }
+
+    private void handleRegistration(SignUpView signUpView, LoginView loginView, UserRepository userRepo) {
+        String firstName = signUpView.getFirstName();
+        String lastName = signUpView.getLastName();
+        String email = signUpView.getEmail();
+        String phone = signUpView.getPhone();
+        String password = signUpView.getPassword();
+        String confirmPassword = signUpView.getConfirmPassword();
+
+        if (!InputValidator.validateString(firstName) || !InputValidator.validateString(lastName)) {
+            signUpView.showError("Vui lòng nhập đầy đủ họ và tên.");
+            return;
+        }
+        if (!InputValidator.validateEmail(email)) {
+            signUpView.showError("Email không hợp lệ.");
+            return;
+        }
+        if (!InputValidator.validatePhoneNumber(phone)) {
+            signUpView.showError("Số điện thoại không hợp lệ (cần 9-11 chữ số).");
+            return;
+        }
+        if (!InputValidator.validateString(password) || password.length() < 6) {
+            signUpView.showError("Mật khẩu phải có ít nhất 6 ký tự.");
+            return;
+        }
+        if (!password.equals(confirmPassword)) {
+            signUpView.showError("Xác nhận mật khẩu không khớp.");
+            return;
+        }
+        if (userRepo.findByEmail(email) != null) {
+            signUpView.showError("Email này đã được sử dụng. Vui lòng chọn email khác.");
+            return;
+        }
+
+        Admin admin = new Admin();
+        admin.setFirstName(firstName);
+        admin.setLastName(lastName);
+        admin.setEmail(email);
+        admin.setPhoneNumber(phone);
+        admin.setPassword(password);
+        admin.setType(0);
+
+        try {
+            int id = userRepo.createUser(admin);
+            if (id > 0) {
+                signUpView.showMessage("Đăng ký thành công! Vui lòng đăng nhập.");
+                signUpView.dispose();
+                loginView.setEmail(email);
+                loginView.clearPassword();
+                loginView.focusPassword();
+            } else {
+                signUpView.showError("Đã xảy ra lỗi khi tạo tài khoản admin.");
+            }
+        } catch (RuntimeException ex) {
+            signUpView.showError("Không thể tạo tài khoản: " + ex.getMessage());
         }
     }
 
@@ -122,26 +192,6 @@ public class Main {
         showLogin(userRepo, packageRepo, registrationRepo);
     }
 
-    private Credentials promptLogin() {
-        JTextField txtEmail = new JTextField();
-        JPasswordField txtPassword = new JPasswordField();
-
-        JPanel panel = new JPanel(new GridLayout(0, 1));
-        panel.add(new JLabel("Email Admin:"));
-        panel.add(txtEmail);
-        panel.add(new JLabel("Mật khẩu:"));
-        panel.add(txtPassword);
-
-        int result = JOptionPane.showConfirmDialog(null, panel, "Đăng nhập Admin",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-        if (result != JOptionPane.OK_OPTION) {
-            return null;
-        }
-
-        return new Credentials(txtEmail.getText().trim(), new String(txtPassword.getPassword()));
-    }
-
     private String formatAdminName(Admin admin) {
         String firstName = admin.getFirstName() != null ? admin.getFirstName() : "";
         String lastName = admin.getLastName() != null ? admin.getLastName() : "";
@@ -156,13 +206,4 @@ public class Main {
         JOptionPane.showMessageDialog(null, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
     }
 
-    private static class Credentials {
-        private final String email;
-        private final String password;
-
-        private Credentials(String email, String password) {
-            this.email = email;
-            this.password = password;
-        }
-    }
 }
