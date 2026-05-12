@@ -47,53 +47,52 @@ public class RegistrationView extends JFrame {
 
     private RegistrationView(String title, String mode) {
         setTitle(title);
-        setSize(800, 520);
+        setSize(860, 560);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        mainPanel.setBackground(new Color(240, 248, 255));
+        JPanel mainPanel = UiTheme.createPagePanel();
 
-        JLabel lblTitle = new JLabel(title, SwingConstants.CENTER);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
-        lblTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
-        mainPanel.add(lblTitle, BorderLayout.NORTH);
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        headerPanel.setOpaque(false);
+        headerPanel.add(UiTheme.createHeaderPanel(title, buildSubtitle(mode)));
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
 
         switch (mode) {
             case "all":
                 buildTable("all");
-                mainPanel.add(new JScrollPane(table), BorderLayout.CENTER);
+                mainPanel.add(UiTheme.createScrollPane(table), BorderLayout.CENTER);
                 break;
             case "member":
                 buildTable("member");
-                JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-                searchPanel.setBackground(new Color(240, 248, 255));
-                searchPanel.add(new JLabel("ID Hội viên:"));
-                txtUserId  = new JTextField(10);
-                btnConfirm = makeButton("Tìm", new Color(52, 120, 200));
+                JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
+                searchPanel.setOpaque(false);
+                searchPanel.add(UiTheme.createLabel("ID Hội viên:"));
+                txtUserId  = UiTheme.createTextField();
+                txtUserId.setColumns(UiTheme.SEARCH_FIELD_COLUMNS);
+                btnConfirm = UiTheme.createPrimaryButton("Tìm");
                 searchPanel.add(txtUserId);
                 searchPanel.add(btnConfirm);
-                mainPanel.add(searchPanel, BorderLayout.NORTH);
-                mainPanel.add(new JScrollPane(table), BorderLayout.CENTER);
+                headerPanel.add(Box.createVerticalStrut(10));
+                headerPanel.add(searchPanel);
+                mainPanel.add(UiTheme.createScrollPane(table), BorderLayout.CENTER);
                 break;
             case "add":
-                JPanel addForm = new JPanel(new GridLayout(0, 2, 10, 10));
-                addForm.setBackground(new Color(240, 248, 255));
-                addForm.add(makeLabel("ID Hội viên:"));
-                txtUserId = new JTextField(); addForm.add(txtUserId);
-                addForm.add(makeLabel("ID Gói tập:"));
-                txtPackageId = new JTextField(); addForm.add(txtPackageId);
-                addForm.add(makeLabel("Ngày bắt đầu (yyyy-MM-dd):"));
-                txtStartDate = new JTextField(); addForm.add(txtStartDate);
+                JPanel addForm = UiTheme.createFormPanel();
+                txtUserId = UiTheme.createTextField();
+                UiTheme.addFormRow(addForm, 0, "ID Hội viên:", txtUserId);
+                txtPackageId = UiTheme.createTextField();
+                UiTheme.addFormRow(addForm, 1, "ID Gói tập:", txtPackageId);
+                txtStartDate = UiTheme.createTextField();
+                UiTheme.addFormRow(addForm, 2, "Ngày bắt đầu (yyyy-MM-dd):", txtStartDate);
                 mainPanel.add(buildFormWithButtons(addForm), BorderLayout.CENTER);
                 break;
             case "renew":
             case "cancel":
-                JPanel simpleForm = new JPanel(new GridLayout(0, 2, 10, 10));
-                simpleForm.setBackground(new Color(240, 248, 255));
-                simpleForm.add(makeLabel("ID Đăng ký:"));
-                txtRegistrationId = new JTextField(); simpleForm.add(txtRegistrationId);
+                JPanel simpleForm = UiTheme.createFormPanel();
+                txtRegistrationId = UiTheme.createTextField();
+                UiTheme.addFormRow(simpleForm, 0, "ID Đăng ký:", txtRegistrationId);
                 mainPanel.add(buildFormWithButtons(simpleForm), BorderLayout.CENTER);
                 break;
         }
@@ -109,41 +108,32 @@ public class RegistrationView extends JFrame {
             public boolean isCellEditable(int r, int c) { return false; }
         };
         table = new JTable(tableModel);
-        table.setFont(new Font("Arial", Font.PLAIN, 13));
-        table.setRowHeight(28);
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
-        table.getTableHeader().setBackground(new Color(52, 120, 200));
-        table.getTableHeader().setForeground(Color.WHITE);
+        UiTheme.styleTable(table);
     }
 
     private JPanel buildFormWithButtons(JPanel formPanel) {
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        btnPanel.setBackground(new Color(240, 248, 255));
-        btnConfirm = makeButton("Xác nhận", new Color(52, 120, 200));
-        btnCancel  = makeButton("Hủy", new Color(180, 50, 50));
-        btnPanel.add(btnConfirm);
-        btnPanel.add(btnCancel);
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.setBackground(new Color(240, 248, 255));
+        btnConfirm = UiTheme.createPrimaryButton("Xác nhận");
+        btnCancel  = UiTheme.createSecondaryButton("Hủy");
+
+        JPanel wrapper = UiTheme.createCardPanel(new BorderLayout(0, 14));
         wrapper.add(formPanel, BorderLayout.CENTER);
-        wrapper.add(btnPanel, BorderLayout.SOUTH);
+        wrapper.add(UiTheme.createButtonBar(btnConfirm, btnCancel), BorderLayout.SOUTH);
         return wrapper;
     }
 
-    private JLabel makeLabel(String text) {
-        JLabel lbl = new JLabel(text);
-        lbl.setFont(new Font("Arial", Font.BOLD, 13));
-        return lbl;
-    }
-
-    private JButton makeButton(String text, Color bg) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.BOLD, 14));
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setPreferredSize(new Dimension(130, 40));
-        return btn;
+    private String buildSubtitle(String mode) {
+        switch (mode) {
+            case "member":
+                return "Tra cứu đăng ký theo từng hội viên.";
+            case "add":
+                return "Tạo mới đăng ký gói tập cho hội viên.";
+            case "renew":
+                return "Gia hạn gói tập dựa trên ID đăng ký.";
+            case "cancel":
+                return "Hủy đăng ký gói tập khi cần thiết.";
+            default:
+                return "Tổng quan toàn bộ đăng ký hiện có.";
+        }
     }
 
     public String getRegistrationId() { return txtRegistrationId != null ? txtRegistrationId.getText().trim() : ""; }
