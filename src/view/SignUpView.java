@@ -70,11 +70,11 @@ public class SignUpView extends JFrame {
     }
 
     public String getPassword() {
-        return new String(txtPassword.getPassword()).trim();
+        return new String(txtPassword.getPassword());
     }
 
     public String getConfirmPassword() {
-        return new String(txtConfirmPassword.getPassword()).trim();
+        return new String(txtConfirmPassword.getPassword());
     }
 
     public JButton getBtnConfirm() {
