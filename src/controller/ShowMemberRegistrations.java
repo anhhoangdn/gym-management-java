@@ -4,17 +4,21 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import model.Registration;
 import repository.RegistrationRepository;
+import repository.UserRepository;
 import util.InputValidator;
 import util.Operation;
+import util.UserDisplayHelper;
 import view.RegistrationView;
 import javax.swing.table.DefaultTableModel;
 
 public class ShowMemberRegistrations implements Operation {
 
     private final RegistrationRepository regRepo;
+    private final UserRepository userRepo;
 
-    public ShowMemberRegistrations(RegistrationRepository regRepo) {
+    public ShowMemberRegistrations(RegistrationRepository regRepo, UserRepository userRepo) {
         this.regRepo = regRepo;
+        this.userRepo = userRepo;
     }
 
     @Override
@@ -40,9 +44,11 @@ public class ShowMemberRegistrations implements Operation {
             }
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String memberLabel = UserDisplayHelper.buildMemberLabel(userRepo.findById(userId), userId);
             for (Registration reg : list) {
                 Object[] row = {
                     reg.getId(),
+                    memberLabel,
                     reg.getPackageId(),
                     reg.getStartDate() != null ? sdf.format(reg.getStartDate()) : "",
                     reg.getEndDate() != null ? sdf.format(reg.getEndDate()) : "",

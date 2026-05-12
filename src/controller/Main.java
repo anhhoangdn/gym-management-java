@@ -187,9 +187,9 @@ public class Main {
         menuView.getBtnCancelRegistration().addActionListener(
                 e -> new CancelRegistration(registrationRepo).execute());
         menuView.getBtnShowAllRegistrations().addActionListener(
-                e -> new ShowAllRegistrations(registrationRepo).execute());
+                e -> new ShowAllRegistrations(registrationRepo, userRepo).execute());
         menuView.getBtnShowMemberRegistrations().addActionListener(
-                e -> new ShowMemberRegistrations(registrationRepo).execute());
+                e -> new ShowMemberRegistrations(registrationRepo, userRepo).execute());
 
         menuView.getBtnEditUserData().addActionListener(e -> new EditUserData(userRepo, admin).execute());
         menuView.getBtnChangePassword().addActionListener(e -> new ChangePassword(userRepo, admin).execute());
