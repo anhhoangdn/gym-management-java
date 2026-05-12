@@ -31,17 +31,18 @@ public class ShowAllRegistrations implements Operation {
 
         List<Registration> list = regRepo.findAll();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Map<Integer, String> memberLabels = buildMemberLabels();
+        Map<Integer, String> memberNames = buildMemberNames();
 
         for (Registration reg : list) {
             int userId = reg.getUserId();
-            String memberLabel = memberLabels.get(userId);
-            if (memberLabel == null) {
-                memberLabel = UserDisplayHelper.buildMemberLabel(null, userId);
+            String memberName = memberNames.get(userId);
+            if (memberName == null) {
+                memberName = UserDisplayHelper.buildMemberName(null);
             }
             Object[] row = {
                 reg.getId(),
-                memberLabel,
+                userId,
+                memberName,
                 reg.getPackageId(),
                 reg.getStartDate() != null ? sdf.format(reg.getStartDate()) : "",
                 reg.getEndDate() != null ? sdf.format(reg.getEndDate()) : "",
@@ -52,12 +53,12 @@ public class ShowAllRegistrations implements Operation {
         }
     }
 
-    private Map<Integer, String> buildMemberLabels() {
-        Map<Integer, String> labels = new HashMap<>();
+    private Map<Integer, String> buildMemberNames() {
+        Map<Integer, String> names = new HashMap<>();
         List<Member> members = userRepo.findAllMembers();
         for (Member member : members) {
-            labels.put(member.getId(), UserDisplayHelper.buildMemberLabel(member, member.getId()));
+            names.put(member.getId(), UserDisplayHelper.buildMemberName(member));
         }
-        return labels;
+        return names;
     }
 }

@@ -29,8 +29,13 @@ public class RenewRegistration implements Operation {
 
         view.getBtnConfirm().addActionListener(e -> {
             String registrationIdStr = view.getRegistrationId();
+            String packageIdStr = view.getPackageId();
             if (!InputValidator.validateInt(registrationIdStr) || Integer.parseInt(registrationIdStr) <= 0) {
                 view.showError("ID đăng ký không hợp lệ!");
+                return;
+            }
+            if (!InputValidator.validateInt(packageIdStr) || Integer.parseInt(packageIdStr) <= 0) {
+                view.showError("ID gói tập không hợp lệ!");
                 return;
             }
 
@@ -41,7 +46,13 @@ public class RenewRegistration implements Operation {
                 return;
             }
 
-            Package gymPackage = packageRepo.findById(registration.getPackageId());
+            int packageId = Integer.parseInt(packageIdStr);
+            if (registration.getPackageId() != packageId) {
+                view.showError("Gói tập không khớp với đăng ký ID = " + registrationId);
+                return;
+            }
+
+            Package gymPackage = packageRepo.findById(packageId);
             if (gymPackage == null) {
                 view.showError("Không tìm thấy gói tập cho đăng ký này.");
                 return;
