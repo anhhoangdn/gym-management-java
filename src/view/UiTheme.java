@@ -28,7 +28,7 @@ public final class UiTheme {
     public static final Font FONT_BUTTON = new Font("SansSerif", Font.BOLD, 13);
     public static final Font FONT_TABLE = new Font("SansSerif", Font.PLAIN, 13);
     public static final Font FONT_TABLE_HEADER = new Font("SansSerif", Font.BOLD, 12);
-    public static final int TEXTFIELD_COLUMNS_SMALL = 12;
+    public static final int TEXT_FIELD_COLUMNS_SMALL = 12;
 
     private UiTheme() {}
 

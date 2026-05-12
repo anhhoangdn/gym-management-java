@@ -5,6 +5,28 @@ import java.awt.*;
 
 public class MenuView extends JFrame {
 
+    private static final String TITLE = "Gym Management - Admin Panel";
+    private static final String WELCOME_FORMAT = "Xin chào, %s";
+    private static final String HEADER_SUBTITLE = "Bảng điều khiển quản trị";
+    private static final String SECTION_PACKAGE = "Quản lý Gói tập";
+    private static final String SECTION_MEMBER = "Quản lý Hội viên";
+    private static final String SECTION_REGISTRATION = "Quản lý Đăng ký";
+    private static final String SECTION_ACCOUNT = "Tài khoản Admin";
+    private static final String BTN_ADD_PACKAGE = "Thêm gói tập";
+    private static final String BTN_UPDATE_PACKAGE = "Cập nhật gói tập";
+    private static final String BTN_DELETE_PACKAGE = "Xóa gói tập";
+    private static final String BTN_ADD_MEMBER = "Thêm hội viên";
+    private static final String BTN_UPDATE_MEMBER = "Cập nhật hội viên";
+    private static final String BTN_DELETE_MEMBER = "Xóa hội viên";
+    private static final String BTN_ADD_REGISTRATION = "Tạo đăng ký mới";
+    private static final String BTN_RENEW_REGISTRATION = "Gia hạn đăng ký";
+    private static final String BTN_CANCEL_REGISTRATION = "Hủy đăng ký";
+    private static final String BTN_SHOW_ALL_REGISTRATIONS = "Xem tất cả đăng ký";
+    private static final String BTN_SHOW_MEMBER_REGISTRATIONS = "Xem đăng ký theo hội viên";
+    private static final String BTN_EDIT_USER_DATA = "Chỉnh sửa thông tin";
+    private static final String BTN_CHANGE_PASSWORD = "Đổi mật khẩu";
+    private static final String BTN_LOGOUT = "Đăng xuất";
+
     private JButton btnAddPackage;
     private JButton btnUpdatePackage;
     private JButton btnDeletePackage;
@@ -21,7 +43,7 @@ public class MenuView extends JFrame {
     private JButton btnLogout;
 
     public MenuView(String adminName) {
-        setTitle("Gym Management - Admin Panel");
+        setTitle(TITLE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(620, 760);
         setLocationRelativeTo(null);
@@ -32,36 +54,36 @@ public class MenuView extends JFrame {
     private void initComponents(String adminName) {
         JPanel mainPanel = UiTheme.createPagePanel();
 
-        JPanel headerPanel = UiTheme.createHeaderPanel("Xin chào, " + adminName, "Bảng điều khiển quản trị");
+        JPanel headerPanel = UiTheme.createHeaderPanel(String.format(WELCOME_FORMAT, adminName), HEADER_SUBTITLE);
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
-        btnAddPackage    = UiTheme.createPrimaryButton("Thêm gói tập");
-        btnUpdatePackage = UiTheme.createPrimaryButton("Cập nhật gói tập");
-        btnDeletePackage = UiTheme.createPrimaryButton("Xóa gói tập");
-        btnAddMember     = UiTheme.createPrimaryButton("Thêm hội viên");
-        btnUpdateMember  = UiTheme.createPrimaryButton("Cập nhật hội viên");
-        btnDeleteMember  = UiTheme.createPrimaryButton("Xóa hội viên");
-        btnAddRegistration         = UiTheme.createPrimaryButton("Tạo đăng ký mới");
-        btnRenewRegistration       = UiTheme.createPrimaryButton("Gia hạn đăng ký");
-        btnCancelRegistration      = UiTheme.createPrimaryButton("Hủy đăng ký");
-        btnShowAllRegistrations    = UiTheme.createPrimaryButton("Xem tất cả đăng ký");
-        btnShowMemberRegistrations = UiTheme.createPrimaryButton("Xem đăng ký theo hội viên");
-        btnEditUserData   = UiTheme.createPrimaryButton("Chỉnh sửa thông tin");
-        btnChangePassword = UiTheme.createPrimaryButton("Đổi mật khẩu");
-        btnLogout         = UiTheme.createDangerButton("Đăng xuất");
+        btnAddPackage    = UiTheme.createPrimaryButton(BTN_ADD_PACKAGE);
+        btnUpdatePackage = UiTheme.createPrimaryButton(BTN_UPDATE_PACKAGE);
+        btnDeletePackage = UiTheme.createPrimaryButton(BTN_DELETE_PACKAGE);
+        btnAddMember     = UiTheme.createPrimaryButton(BTN_ADD_MEMBER);
+        btnUpdateMember  = UiTheme.createPrimaryButton(BTN_UPDATE_MEMBER);
+        btnDeleteMember  = UiTheme.createPrimaryButton(BTN_DELETE_MEMBER);
+        btnAddRegistration         = UiTheme.createPrimaryButton(BTN_ADD_REGISTRATION);
+        btnRenewRegistration       = UiTheme.createPrimaryButton(BTN_RENEW_REGISTRATION);
+        btnCancelRegistration      = UiTheme.createPrimaryButton(BTN_CANCEL_REGISTRATION);
+        btnShowAllRegistrations    = UiTheme.createPrimaryButton(BTN_SHOW_ALL_REGISTRATIONS);
+        btnShowMemberRegistrations = UiTheme.createPrimaryButton(BTN_SHOW_MEMBER_REGISTRATIONS);
+        btnEditUserData   = UiTheme.createPrimaryButton(BTN_EDIT_USER_DATA);
+        btnChangePassword = UiTheme.createPrimaryButton(BTN_CHANGE_PASSWORD);
+        btnLogout         = UiTheme.createDangerButton(BTN_LOGOUT);
 
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setOpaque(false);
 
-        contentPanel.add(buildSection("Quản lý Gói tập", btnAddPackage, btnUpdatePackage, btnDeletePackage));
+        contentPanel.add(buildSection(SECTION_PACKAGE, btnAddPackage, btnUpdatePackage, btnDeletePackage));
         contentPanel.add(Box.createVerticalStrut(12));
-        contentPanel.add(buildSection("Quản lý Hội viên", btnAddMember, btnUpdateMember, btnDeleteMember));
+        contentPanel.add(buildSection(SECTION_MEMBER, btnAddMember, btnUpdateMember, btnDeleteMember));
         contentPanel.add(Box.createVerticalStrut(12));
-        contentPanel.add(buildSection("Quản lý Đăng ký", btnAddRegistration, btnRenewRegistration,
+        contentPanel.add(buildSection(SECTION_REGISTRATION, btnAddRegistration, btnRenewRegistration,
                 btnCancelRegistration, btnShowAllRegistrations, btnShowMemberRegistrations));
         contentPanel.add(Box.createVerticalStrut(12));
-        contentPanel.add(buildSection("Tài khoản Admin", btnEditUserData, btnChangePassword, btnLogout));
+        contentPanel.add(buildSection(SECTION_ACCOUNT, btnEditUserData, btnChangePassword, btnLogout));
 
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
