@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import model.Registration;
-import model.User;
 import repository.RegistrationRepository;
 import repository.UserRepository;
 import util.Operation;
+import util.UserDisplayHelper;
 import view.RegistrationView;
 import javax.swing.table.DefaultTableModel;
 
@@ -35,7 +35,7 @@ public class ShowAllRegistrations implements Operation {
         for (Registration reg : list) {
             String memberLabel = memberLabels.computeIfAbsent(
                 reg.getUserId(),
-                userId -> buildMemberLabel(userRepo.findById(userId), userId)
+                userId -> UserDisplayHelper.buildMemberLabel(userRepo.findById(userId), userId)
             );
             Object[] row = {
                 reg.getId(),
@@ -48,18 +48,5 @@ public class ShowAllRegistrations implements Operation {
             };
             model.addRow(row);
         }
-    }
-
-    private String buildMemberLabel(User user, int userId) {
-        if (user == null) {
-            return "ID " + userId;
-        }
-        String firstName = user.getFirstName() != null ? user.getFirstName().trim() : "";
-        String lastName = user.getLastName() != null ? user.getLastName().trim() : "";
-        String name = (firstName + " " + lastName).trim();
-        if (name.isEmpty()) {
-            return "ID " + userId;
-        }
-        return name + " (ID " + userId + ")";
     }
 }

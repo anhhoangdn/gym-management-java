@@ -3,11 +3,11 @@ package controller;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import model.Registration;
-import model.User;
 import repository.RegistrationRepository;
 import repository.UserRepository;
 import util.InputValidator;
 import util.Operation;
+import util.UserDisplayHelper;
 import view.RegistrationView;
 import javax.swing.table.DefaultTableModel;
 
@@ -44,8 +44,7 @@ public class ShowMemberRegistrations implements Operation {
             }
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            User member = userRepo.findById(userId);
-            String memberLabel = buildMemberLabel(member, userId);
+            String memberLabel = UserDisplayHelper.buildMemberLabel(userRepo.findById(userId), userId);
             for (Registration reg : list) {
                 Object[] row = {
                     reg.getId(),
@@ -59,18 +58,5 @@ public class ShowMemberRegistrations implements Operation {
                 model.addRow(row);
             }
         });
-    }
-
-    private String buildMemberLabel(User user, int userId) {
-        if (user == null) {
-            return "ID " + userId;
-        }
-        String firstName = user.getFirstName() != null ? user.getFirstName().trim() : "";
-        String lastName = user.getLastName() != null ? user.getLastName().trim() : "";
-        String name = (firstName + " " + lastName).trim();
-        if (name.isEmpty()) {
-            return "ID " + userId;
-        }
-        return name + " (ID " + userId + ")";
     }
 }

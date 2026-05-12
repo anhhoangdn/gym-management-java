@@ -91,6 +91,6 @@ public class RenewRegistration implements Operation {
         if (name.isEmpty()) {
             return "gói tập ID = " + gymPackage.getId();
         }
-        return "gói tập \"" + name + "\" (ID " + gymPackage.getId() + ")";
+        return "gói tập \"" + name + "\" (ID = " + gymPackage.getId() + ")";
     }
 }
