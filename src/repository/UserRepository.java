@@ -38,6 +38,30 @@ public class UserRepository extends BaseRepository {
         }
     }
 
+    public int createUser(User user, char[] rawPassword) {
+        String sql = "INSERT INTO users(firstName, lastName, email, phoneNumber, password, type) VALUES(?, ?, ?, ?, ?, ?)";
+
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, user.getFirstName());
+            ps.setString(2, user.getLastName());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getPhoneNumber());
+            ps.setString(5, PasswordUtil.hashPassword(rawPassword));
+            ps.setInt(6, user.getType());
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+            return -1;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to create user", e);
+        }
+    }
+
     public User findById(int id) {
         String sql = "SELECT id, firstName, lastName, email, phoneNumber, password, type FROM users WHERE id = ?";
 
@@ -135,7 +159,7 @@ public class UserRepository extends BaseRepository {
         }
     }
 
-    public Admin authenticateAdmin(String email, String rawPassword) {
+    public Admin authenticateAdmin(String email, char[] rawPassword) {
         String sql = "SELECT id, firstName, lastName, email, phoneNumber, password, type FROM users WHERE email = ? AND type = 0";
 
         try (Connection con = getConnection();
