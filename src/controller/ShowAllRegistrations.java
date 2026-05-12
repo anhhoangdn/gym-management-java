@@ -1,9 +1,13 @@
 package controller;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import model.Registration;
+import model.User;
 import repository.RegistrationRepository;
+import repository.UserRepository;
 import util.Operation;
 import view.RegistrationView;
 import javax.swing.table.DefaultTableModel;
@@ -11,9 +15,11 @@ import javax.swing.table.DefaultTableModel;
 public class ShowAllRegistrations implements Operation {
 
     private final RegistrationRepository regRepo;
+    private final UserRepository userRepo;
 
-    public ShowAllRegistrations(RegistrationRepository regRepo) {
+    public ShowAllRegistrations(RegistrationRepository regRepo, UserRepository userRepo) {
         this.regRepo = regRepo;
+        this.userRepo = userRepo;
     }
 
     @Override
@@ -24,11 +30,16 @@ public class ShowAllRegistrations implements Operation {
 
         List<Registration> list = regRepo.findAll();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Map<Integer, String> memberLabels = new HashMap<>();
 
         for (Registration reg : list) {
+            String memberLabel = memberLabels.computeIfAbsent(
+                reg.getUserId(),
+                userId -> buildMemberLabel(userRepo.findById(userId), userId)
+            );
             Object[] row = {
                 reg.getId(),
-                reg.getUserId(),
+                memberLabel,
                 reg.getPackageId(),
                 reg.getStartDate() != null ? sdf.format(reg.getStartDate()) : "",
                 reg.getEndDate() != null ? sdf.format(reg.getEndDate()) : "",
@@ -37,5 +48,18 @@ public class ShowAllRegistrations implements Operation {
             };
             model.addRow(row);
         }
+    }
+
+    private String buildMemberLabel(User user, int userId) {
+        if (user == null) {
+            return "ID " + userId;
+        }
+        String firstName = user.getFirstName() != null ? user.getFirstName().trim() : "";
+        String lastName = user.getLastName() != null ? user.getLastName().trim() : "";
+        String name = (firstName + " " + lastName).trim();
+        if (name.isEmpty()) {
+            return "ID " + userId;
+        }
+        return name + " (ID " + userId + ")";
     }
 }

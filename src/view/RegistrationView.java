@@ -1,6 +1,7 @@
 package view;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
@@ -61,11 +62,11 @@ public class RegistrationView extends JFrame {
 
         switch (mode) {
             case "all":
-                buildTable("all");
+                buildTable();
                 mainPanel.add(UiTheme.createScrollPane(table), BorderLayout.CENTER);
                 break;
             case "member":
-                buildTable("member");
+                buildTable();
                 JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
                 searchPanel.setOpaque(false);
                 searchPanel.add(UiTheme.createLabel("ID Hội viên:"));
@@ -100,15 +101,23 @@ public class RegistrationView extends JFrame {
         add(mainPanel);
     }
 
-    private void buildTable(String mode) {
-        String[] columns = mode.equals("all")
-            ? new String[]{"ID", "Hội viên", "Gói tập", "Ngày bắt đầu", "Ngày kết thúc", "Tổng tiền", "Trạng thái"}
-            : new String[]{"ID", "Gói tập", "Ngày bắt đầu", "Ngày kết thúc", "Tổng tiền", "Trạng thái"};
+    private void buildTable() {
+        String[] columns = new String[]{"ID", "Hội viên", "Gói tập", "Ngày bắt đầu", "Ngày kết thúc", "Tổng tiền", "Trạng thái"};
         tableModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
         table = new JTable(tableModel);
         UiTheme.styleTable(table);
+        centerMemberColumn();
+    }
+
+    private void centerMemberColumn() {
+        if (table == null || table.getColumnCount() <= 1) {
+            return;
+        }
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        table.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
     }
 
     private JPanel buildFormWithButtons(JPanel formPanel) {

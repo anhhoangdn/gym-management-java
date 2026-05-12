@@ -2,6 +2,7 @@ package controller;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import javax.swing.JOptionPane;
 import model.Package;
 import model.Registration;
 import repository.PackageRepository;
@@ -60,9 +61,20 @@ public class RenewRegistration implements Operation {
             LocalDate newEndDate = baseDate.plusMonths(gymPackage.getDuration());
             double newTotal = registration.getTotal() + gymPackage.getPrice();
 
+            String packageLabel = buildPackageLabel(gymPackage);
+            int confirm = JOptionPane.showConfirmDialog(
+                    view,
+                    "Gia hạn gói tập " + packageLabel + " cho đăng ký ID = " + registrationId + "?",
+                    "Xác nhận gia hạn",
+                    JOptionPane.YES_NO_OPTION
+            );
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+
             boolean success = registrationRepo.renewRegistration(registrationId, java.sql.Date.valueOf(newEndDate), newTotal);
             if (success) {
-                view.showMessage("Gia hạn đăng ký thành công! Ngày kết thúc mới: " + newEndDate);
+                view.showMessage("Gia hạn " + packageLabel + " thành công! Ngày kết thúc mới: " + newEndDate);
                 view.dispose();
             } else {
                 view.showError("Gia hạn đăng ký thất bại. Vui lòng thử lại.");
@@ -72,5 +84,13 @@ public class RenewRegistration implements Operation {
 
     private LocalDate toLocalDate(java.util.Date date) {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+    private String buildPackageLabel(Package gymPackage) {
+        String name = gymPackage.getPackageName() != null ? gymPackage.getPackageName().trim() : "";
+        if (name.isEmpty()) {
+            return "gói tập ID = " + gymPackage.getId();
+        }
+        return "gói tập \"" + name + "\" (ID " + gymPackage.getId() + ")";
     }
 }

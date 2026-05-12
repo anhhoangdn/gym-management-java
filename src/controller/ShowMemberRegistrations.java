@@ -3,7 +3,9 @@ package controller;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import model.Registration;
+import model.User;
 import repository.RegistrationRepository;
+import repository.UserRepository;
 import util.InputValidator;
 import util.Operation;
 import view.RegistrationView;
@@ -12,9 +14,11 @@ import javax.swing.table.DefaultTableModel;
 public class ShowMemberRegistrations implements Operation {
 
     private final RegistrationRepository regRepo;
+    private final UserRepository userRepo;
 
-    public ShowMemberRegistrations(RegistrationRepository regRepo) {
+    public ShowMemberRegistrations(RegistrationRepository regRepo, UserRepository userRepo) {
         this.regRepo = regRepo;
+        this.userRepo = userRepo;
     }
 
     @Override
@@ -40,9 +44,12 @@ public class ShowMemberRegistrations implements Operation {
             }
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            User member = userRepo.findById(userId);
+            String memberLabel = buildMemberLabel(member, userId);
             for (Registration reg : list) {
                 Object[] row = {
                     reg.getId(),
+                    memberLabel,
                     reg.getPackageId(),
                     reg.getStartDate() != null ? sdf.format(reg.getStartDate()) : "",
                     reg.getEndDate() != null ? sdf.format(reg.getEndDate()) : "",
@@ -52,5 +59,18 @@ public class ShowMemberRegistrations implements Operation {
                 model.addRow(row);
             }
         });
+    }
+
+    private String buildMemberLabel(User user, int userId) {
+        if (user == null) {
+            return "ID " + userId;
+        }
+        String firstName = user.getFirstName() != null ? user.getFirstName().trim() : "";
+        String lastName = user.getLastName() != null ? user.getLastName().trim() : "";
+        String name = (firstName + " " + lastName).trim();
+        if (name.isEmpty()) {
+            return "ID " + userId;
+        }
+        return name + " (ID " + userId + ")";
     }
 }
