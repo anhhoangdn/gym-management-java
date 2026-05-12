@@ -1,21 +1,76 @@
 package controller;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import model.Package;
+import model.Registration;
+import repository.PackageRepository;
+import repository.RegistrationRepository;
+import util.InputValidator;
 import util.Operation;
 import view.RegistrationView;
 
 public class RenewRegistration implements Operation {
 
-    private RegistrationView registrationView;
+    private final RegistrationRepository registrationRepo;
+    private final PackageRepository packageRepo;
 
-    public RenewRegistration() {
-        // TODO: initialize RegistrationView and any required dependencies
-        this.registrationView = new RegistrationView();
+    public RenewRegistration(RegistrationRepository registrationRepo, PackageRepository packageRepo) {
+        this.registrationRepo = registrationRepo;
+        this.packageRepo = packageRepo;
     }
 
     @Override
     public void execute() {
-        // TODO: display the registration list, allow the admin to select a registration,
-        //       extend the endDate based on the package duration,
-        //       and update the registration record in the database
+        RegistrationView view = RegistrationView.showRenewForm();
+
+        view.getBtnCancel().addActionListener(e -> view.dispose());
+
+        view.getBtnConfirm().addActionListener(e -> {
+            String registrationIdStr = view.getRegistrationId();
+            if (!InputValidator.validateInt(registrationIdStr) || Integer.parseInt(registrationIdStr) <= 0) {
+                view.showError("ID đăng ký không hợp lệ!");
+                return;
+            }
+
+            int registrationId = Integer.parseInt(registrationIdStr);
+            Registration registration = registrationRepo.findById(registrationId);
+            if (registration == null) {
+                view.showError("Không tìm thấy đăng ký với ID = " + registrationId);
+                return;
+            }
+
+            Package gymPackage = packageRepo.findById(registration.getPackageId());
+            if (gymPackage == null) {
+                view.showError("Không tìm thấy gói tập cho đăng ký này.");
+                return;
+            }
+            if (gymPackage.getDuration() <= 0) {
+                view.showError("Thời hạn gói tập không hợp lệ.");
+                return;
+            }
+
+            if (registration.getEndDate() == null) {
+                view.showError("Đăng ký thiếu ngày kết thúc, không thể gia hạn.");
+                return;
+            }
+
+            LocalDate currentEndDate = toLocalDate(registration.getEndDate());
+            LocalDate baseDate = currentEndDate.isBefore(LocalDate.now()) ? LocalDate.now() : currentEndDate;
+            LocalDate newEndDate = baseDate.plusMonths(gymPackage.getDuration());
+            double newTotal = registration.getTotal() + gymPackage.getPrice();
+
+            boolean success = registrationRepo.renewRegistration(registrationId, java.sql.Date.valueOf(newEndDate), newTotal);
+            if (success) {
+                view.showMessage("Gia hạn đăng ký thành công! Ngày kết thúc mới: " + newEndDate);
+                view.dispose();
+            } else {
+                view.showError("Gia hạn đăng ký thất bại. Vui lòng thử lại.");
+            }
+        });
+    }
+
+    private LocalDate toLocalDate(java.util.Date date) {
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 }
