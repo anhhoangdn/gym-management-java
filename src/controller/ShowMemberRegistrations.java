@@ -3,6 +3,7 @@ package controller;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import model.Registration;
+import model.User;
 import repository.RegistrationRepository;
 import repository.UserRepository;
 import util.InputValidator;
@@ -44,11 +45,13 @@ public class ShowMemberRegistrations implements Operation {
             }
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String memberLabel = UserDisplayHelper.buildMemberLabel(userRepo.findById(userId), userId);
+            User member = userRepo.findById(userId);
+            String memberName = UserDisplayHelper.buildMemberName(member);
             for (Registration reg : list) {
                 Object[] row = {
                     reg.getId(),
-                    memberLabel,
+                    userId,
+                    memberName,
                     reg.getPackageId(),
                     reg.getStartDate() != null ? sdf.format(reg.getStartDate()) : "",
                     reg.getEndDate() != null ? sdf.format(reg.getEndDate()) : "",

@@ -3,6 +3,7 @@ package view;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 
 public class RegistrationView extends JFrame {
@@ -90,6 +91,13 @@ public class RegistrationView extends JFrame {
                 mainPanel.add(buildFormWithButtons(addForm), BorderLayout.CENTER);
                 break;
             case "renew":
+                JPanel renewForm = UiTheme.createFormPanel();
+                txtRegistrationId = UiTheme.createTextField();
+                UiTheme.addFormRow(renewForm, 0, "ID Đăng ký:", txtRegistrationId);
+                txtPackageId = UiTheme.createTextField();
+                UiTheme.addFormRow(renewForm, 1, "ID Gói tập:", txtPackageId);
+                mainPanel.add(buildFormWithButtons(renewForm), BorderLayout.CENTER);
+                break;
             case "cancel":
                 JPanel simpleForm = UiTheme.createFormPanel();
                 txtRegistrationId = UiTheme.createTextField();
@@ -102,22 +110,36 @@ public class RegistrationView extends JFrame {
     }
 
     private void buildTable() {
-        String[] columns = new String[]{"ID", "Hội viên", "Gói tập", "Ngày bắt đầu", "Ngày kết thúc", "Tổng tiền", "Trạng thái"};
+        String[] columns = new String[]{"ID", "ID Hội viên", "Tên hội viên", "Gói tập", "Ngày bắt đầu", "Ngày kết thúc", "Tổng tiền", "Trạng thái"};
         tableModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
         table = new JTable(tableModel);
         UiTheme.styleTable(table);
-        centerMemberColumn();
+        centerMemberColumns();
     }
 
-    private void centerMemberColumn() {
-        if (table == null || table.getColumnCount() <= 1) {
+    private void centerMemberColumns() {
+        centerColumn(1);
+        centerColumn(2);
+    }
+
+    private void centerColumn(int columnIndex) {
+        if (table == null || table.getColumnCount() <= columnIndex) {
             return;
         }
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        table.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        table.getColumnModel().getColumn(columnIndex).setCellRenderer(centerRenderer);
+
+        JTableHeader header = table.getTableHeader();
+        DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer();
+        headerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        headerRenderer.setFont(header.getFont());
+        headerRenderer.setBackground(header.getBackground());
+        headerRenderer.setForeground(header.getForeground());
+        headerRenderer.setOpaque(true);
+        table.getColumnModel().getColumn(columnIndex).setHeaderRenderer(headerRenderer);
     }
 
     private JPanel buildFormWithButtons(JPanel formPanel) {
@@ -137,7 +159,7 @@ public class RegistrationView extends JFrame {
             case "add":
                 return "Tạo mới đăng ký gói tập cho hội viên.";
             case "renew":
-                return "Gia hạn gói tập dựa trên ID đăng ký.";
+                return "Gia hạn gói tập dựa trên ID đăng ký và ID gói tập.";
             case "cancel":
                 return "Hủy đăng ký gói tập khi cần thiết.";
             default:
