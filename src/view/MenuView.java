@@ -23,83 +23,64 @@ public class MenuView extends JFrame {
     public MenuView(String adminName) {
         setTitle("Gym Management - Admin Panel");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(500, 700);
+        setSize(620, 760);
         setLocationRelativeTo(null);
         setResizable(false);
         initComponents(adminName);
     }
 
     private void initComponents(String adminName) {
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-        mainPanel.setBackground(new Color(30, 30, 30));
+        JPanel mainPanel = UiTheme.createPagePanel();
 
-        JLabel lblWelcome = new JLabel("Welcome, " + adminName, SwingConstants.CENTER);
-        lblWelcome.setFont(new Font("Arial", Font.BOLD, 22));
-        lblWelcome.setForeground(Color.WHITE);
-        lblWelcome.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        JPanel headerPanel = UiTheme.createHeaderPanel("Xin chào, " + adminName, "Bảng điều khiển quản trị");
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
 
-        JPanel btnPanel = new JPanel(new GridLayout(0, 1, 8, 8));
-        btnPanel.setBackground(new Color(30, 30, 30));
+        btnAddPackage    = UiTheme.createPrimaryButton("Thêm gói tập");
+        btnUpdatePackage = UiTheme.createPrimaryButton("Cập nhật gói tập");
+        btnDeletePackage = UiTheme.createPrimaryButton("Xóa gói tập");
+        btnAddMember     = UiTheme.createPrimaryButton("Thêm hội viên");
+        btnUpdateMember  = UiTheme.createPrimaryButton("Cập nhật hội viên");
+        btnDeleteMember  = UiTheme.createPrimaryButton("Xóa hội viên");
+        btnAddRegistration         = UiTheme.createPrimaryButton("Tạo đăng ký mới");
+        btnRenewRegistration       = UiTheme.createPrimaryButton("Gia hạn đăng ký");
+        btnCancelRegistration      = UiTheme.createPrimaryButton("Hủy đăng ký");
+        btnShowAllRegistrations    = UiTheme.createPrimaryButton("Xem tất cả đăng ký");
+        btnShowMemberRegistrations = UiTheme.createPrimaryButton("Xem đăng ký theo hội viên");
+        btnEditUserData   = UiTheme.createPrimaryButton("Chỉnh sửa thông tin");
+        btnChangePassword = UiTheme.createPrimaryButton("Đổi mật khẩu");
+        btnLogout         = UiTheme.createDangerButton("Đăng xuất");
 
-        btnPanel.add(makeSectionLabel("── Quản lý Gói tập ──"));
-        btnAddPackage    = makeButton("Thêm gói tập");
-        btnUpdatePackage = makeButton("Cập nhật gói tập");
-        btnDeletePackage = makeButton("Xóa gói tập");
-        btnPanel.add(btnAddPackage);
-        btnPanel.add(btnUpdatePackage);
-        btnPanel.add(btnDeletePackage);
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setOpaque(false);
 
-        btnPanel.add(makeSectionLabel("── Quản lý Hội viên ──"));
-        btnAddMember    = makeButton("Thêm hội viên");
-        btnUpdateMember = makeButton("Cập nhật hội viên");
-        btnDeleteMember = makeButton("Xóa hội viên");
-        btnPanel.add(btnAddMember);
-        btnPanel.add(btnUpdateMember);
-        btnPanel.add(btnDeleteMember);
+        contentPanel.add(buildSection("Quản lý Gói tập", btnAddPackage, btnUpdatePackage, btnDeletePackage));
+        contentPanel.add(Box.createVerticalStrut(12));
+        contentPanel.add(buildSection("Quản lý Hội viên", btnAddMember, btnUpdateMember, btnDeleteMember));
+        contentPanel.add(Box.createVerticalStrut(12));
+        contentPanel.add(buildSection("Quản lý Đăng ký", btnAddRegistration, btnRenewRegistration,
+                btnCancelRegistration, btnShowAllRegistrations, btnShowMemberRegistrations));
+        contentPanel.add(Box.createVerticalStrut(12));
+        contentPanel.add(buildSection("Tài khoản Admin", btnEditUserData, btnChangePassword, btnLogout));
 
-        btnPanel.add(makeSectionLabel("── Quản lý Đăng ký ──"));
-        btnAddRegistration         = makeButton("Tạo đăng ký mới");
-        btnRenewRegistration       = makeButton("Gia hạn đăng ký");
-        btnCancelRegistration      = makeButton("Hủy đăng ký");
-        btnShowAllRegistrations    = makeButton("Xem tất cả đăng ký");
-        btnShowMemberRegistrations = makeButton("Xem đăng ký theo hội viên");
-        btnPanel.add(btnAddRegistration);
-        btnPanel.add(btnRenewRegistration);
-        btnPanel.add(btnCancelRegistration);
-        btnPanel.add(btnShowAllRegistrations);
-        btnPanel.add(btnShowMemberRegistrations);
-
-        btnPanel.add(makeSectionLabel("── Tài khoản Admin ──"));
-        btnEditUserData   = makeButton("Chỉnh sửa thông tin");
-        btnChangePassword = makeButton("Đổi mật khẩu");
-        btnLogout         = makeButton("Đăng xuất");
-        btnLogout.setBackground(new Color(180, 50, 50));
-        btnPanel.add(btnEditUserData);
-        btnPanel.add(btnChangePassword);
-        btnPanel.add(btnLogout);
-
-        mainPanel.add(lblWelcome, BorderLayout.NORTH);
-        mainPanel.add(new JScrollPane(btnPanel), BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(UiTheme.BACKGROUND);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
         add(mainPanel);
     }
 
-    private JButton makeButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.BOLD, 14));
-        btn.setBackground(new Color(52, 120, 200));
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        return btn;
-    }
+    private JPanel buildSection(String title, JButton... buttons) {
+        JPanel card = UiTheme.createCardPanel(new BorderLayout(0, 12));
+        card.add(UiTheme.createSectionLabel(title), BorderLayout.NORTH);
 
-    private JLabel makeSectionLabel(String text) {
-        JLabel lbl = new JLabel(text, SwingConstants.CENTER);
-        lbl.setFont(new Font("Arial", Font.ITALIC, 12));
-        lbl.setForeground(new Color(180, 180, 180));
-        return lbl;
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 10, 10));
+        buttonPanel.setOpaque(false);
+        for (JButton button : buttons) {
+            buttonPanel.add(button);
+        }
+        card.add(buttonPanel, BorderLayout.CENTER);
+        return card;
     }
 
     public JButton getBtnAddPackage()               { return btnAddPackage; }

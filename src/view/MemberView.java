@@ -43,62 +43,43 @@ public class MemberView extends JFrame {
 
     private MemberView(String title, boolean showFullForm, boolean showIdField) {
         setTitle(title);
-        setSize(700, 480);
+        setSize(740, 520);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        mainPanel.setBackground(new Color(240, 248, 255));
-
-        JLabel lblTitle = new JLabel(title, SwingConstants.CENTER);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
-        lblTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
-        mainPanel.add(lblTitle, BorderLayout.NORTH);
+        JPanel mainPanel = UiTheme.createPagePanel();
+        mainPanel.add(UiTheme.createHeaderPanel(title, buildSubtitle(showFullForm, showIdField)), BorderLayout.NORTH);
 
         if (showFullForm || showIdField) {
-            JPanel formPanel = new JPanel(new GridLayout(0, 2, 10, 10));
-            formPanel.setBackground(new Color(240, 248, 255));
-
+            JPanel formPanel = UiTheme.createFormPanel();
+            int row = 0;
             if (showIdField) {
-                formPanel.add(makeLabel("ID Hội viên:"));
-                txtId = new JTextField();
-                formPanel.add(txtId);
+                txtId = UiTheme.createTextField();
+                UiTheme.addFormRow(formPanel, row++, "ID Hội viên:", txtId);
             }
             if (showFullForm) {
-                formPanel.add(makeLabel("Họ:"));
-                txtFirstName = new JTextField();
-                formPanel.add(txtFirstName);
+                txtFirstName = UiTheme.createTextField();
+                UiTheme.addFormRow(formPanel, row++, "Họ:", txtFirstName);
 
-                formPanel.add(makeLabel("Tên:"));
-                txtLastName = new JTextField();
-                formPanel.add(txtLastName);
+                txtLastName = UiTheme.createTextField();
+                UiTheme.addFormRow(formPanel, row++, "Tên:", txtLastName);
 
-                formPanel.add(makeLabel("Email:"));
-                txtEmail = new JTextField();
-                formPanel.add(txtEmail);
+                txtEmail = UiTheme.createTextField();
+                UiTheme.addFormRow(formPanel, row++, "Email:", txtEmail);
 
-                formPanel.add(makeLabel("Số điện thoại:"));
-                txtPhone = new JTextField();
-                formPanel.add(txtPhone);
+                txtPhone = UiTheme.createTextField();
+                UiTheme.addFormRow(formPanel, row++, "Số điện thoại:", txtPhone);
 
-                formPanel.add(makeLabel("Mật khẩu:"));
-                txtPassword = new JPasswordField();
-                formPanel.add(txtPassword);
+                txtPassword = UiTheme.createPasswordField();
+                UiTheme.addFormRow(formPanel, row++, "Mật khẩu:", txtPassword);
             }
+            btnConfirm = UiTheme.createPrimaryButton("Xác nhận");
+            btnCancel  = UiTheme.createSecondaryButton("Hủy");
 
-            JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-            btnPanel.setBackground(new Color(240, 248, 255));
-            btnConfirm = makeButton("Xác nhận", new Color(52, 120, 200));
-            btnCancel  = makeButton("Hủy", new Color(180, 50, 50));
-            btnPanel.add(btnConfirm);
-            btnPanel.add(btnCancel);
-
-            JPanel centerPanel = new JPanel(new BorderLayout());
-            centerPanel.setBackground(new Color(240, 248, 255));
-            centerPanel.add(formPanel, BorderLayout.CENTER);
-            centerPanel.add(btnPanel, BorderLayout.SOUTH);
-            mainPanel.add(centerPanel, BorderLayout.CENTER);
+            JPanel card = UiTheme.createCardPanel(new BorderLayout(0, 14));
+            card.add(formPanel, BorderLayout.CENTER);
+            card.add(UiTheme.createButtonBar(btnConfirm, btnCancel), BorderLayout.SOUTH);
+            mainPanel.add(card, BorderLayout.CENTER);
 
         } else {
             String[] columns = {"ID", "Họ", "Tên", "Email", "Số điện thoại"};
@@ -106,31 +87,21 @@ public class MemberView extends JFrame {
                 public boolean isCellEditable(int r, int c) { return false; }
             };
             table = new JTable(tableModel);
-            table.setFont(new Font("Arial", Font.PLAIN, 13));
-            table.setRowHeight(28);
-            table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
-            table.getTableHeader().setBackground(new Color(52, 120, 200));
-            table.getTableHeader().setForeground(Color.WHITE);
-            mainPanel.add(new JScrollPane(table), BorderLayout.CENTER);
+            UiTheme.styleTable(table);
+            mainPanel.add(UiTheme.createScrollPane(table), BorderLayout.CENTER);
         }
 
         add(mainPanel);
     }
 
-    private JLabel makeLabel(String text) {
-        JLabel lbl = new JLabel(text);
-        lbl.setFont(new Font("Arial", Font.BOLD, 13));
-        return lbl;
-    }
-
-    private JButton makeButton(String text, Color bg) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.BOLD, 14));
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setPreferredSize(new Dimension(130, 40));
-        return btn;
+    private String buildSubtitle(boolean showFullForm, boolean showIdField) {
+        if (showFullForm) {
+            return "Nhập thông tin hội viên để hoàn tất thao tác.";
+        }
+        if (showIdField) {
+            return "Nhập ID hội viên cần thao tác.";
+        }
+        return "Danh sách hội viên hiện tại trong hệ thống.";
     }
 
     public String getMemberId()     { return txtId != null ? txtId.getText().trim() : ""; }
