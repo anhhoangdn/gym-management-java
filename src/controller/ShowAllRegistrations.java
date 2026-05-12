@@ -1,7 +1,10 @@
 package controller;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import model.Member;
 import model.Registration;
 import repository.RegistrationRepository;
 import repository.UserRepository;
@@ -28,13 +31,14 @@ public class ShowAllRegistrations implements Operation {
 
         List<Registration> list = regRepo.findAll();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Map<Integer, String> memberLabels = buildMemberLabels();
 
         for (Registration reg : list) {
             int userId = reg.getUserId();
-            String memberLabel = UserDisplayHelper.buildMemberLabel(
-                userRepo.findById(userId),
-                userId
-            );
+            String memberLabel = memberLabels.get(userId);
+            if (memberLabel == null) {
+                memberLabel = UserDisplayHelper.buildMemberLabel(null, userId);
+            }
             Object[] row = {
                 reg.getId(),
                 memberLabel,
@@ -46,5 +50,14 @@ public class ShowAllRegistrations implements Operation {
             };
             model.addRow(row);
         }
+    }
+
+    private Map<Integer, String> buildMemberLabels() {
+        Map<Integer, String> labels = new HashMap<>();
+        List<Member> members = userRepo.findAllMembers();
+        for (Member member : members) {
+            labels.put(member.getId(), UserDisplayHelper.buildMemberLabel(member, member.getId()));
+        }
+        return labels;
     }
 }
