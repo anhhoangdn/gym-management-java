@@ -59,8 +59,8 @@ public class LoginView extends JFrame {
         return txtEmail.getText().trim();
     }
 
-    public String getPassword() {
-        return new String(txtPassword.getPassword());
+    public char[] getPassword() {
+        return txtPassword.getPassword();
     }
 
     public void setEmail(String email) {

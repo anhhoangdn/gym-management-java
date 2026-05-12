@@ -69,12 +69,12 @@ public class SignUpView extends JFrame {
         return txtPhone.getText().trim();
     }
 
-    public String getPassword() {
-        return new String(txtPassword.getPassword());
+    public char[] getPassword() {
+        return txtPassword.getPassword();
     }
 
-    public String getConfirmPassword() {
-        return new String(txtConfirmPassword.getPassword());
+    public char[] getConfirmPassword() {
+        return txtConfirmPassword.getPassword();
     }
 
     public JButton getBtnConfirm() {
@@ -83,6 +83,11 @@ public class SignUpView extends JFrame {
 
     public JButton getBtnCancel() {
         return btnCancel;
+    }
+
+    public void clearPasswords() {
+        txtPassword.setText("");
+        txtConfirmPassword.setText("");
     }
 
     public void showMessage(String msg) {

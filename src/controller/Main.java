@@ -2,6 +2,7 @@ package controller;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import model.Admin;
@@ -58,7 +59,10 @@ public class Main {
     private void handleLogin(LoginView loginView, UserRepository userRepo,
                              PackageRepository packageRepo, RegistrationRepository registrationRepo) {
         String email = loginView.getEmail();
-        String password = loginView.getPassword();
+        char[] passwordChars = loginView.getPassword();
+        String password = new String(passwordChars);
+        Arrays.fill(passwordChars, '\0');
+        loginView.clearPassword();
 
         if (!InputValidator.validateEmail(email)) {
             loginView.showError("Email không hợp lệ.");
@@ -94,8 +98,13 @@ public class Main {
         String lastName = signUpView.getLastName();
         String email = signUpView.getEmail();
         String phone = signUpView.getPhone();
-        String password = signUpView.getPassword();
-        String confirmPassword = signUpView.getConfirmPassword();
+        char[] passwordChars = signUpView.getPassword();
+        char[] confirmPasswordChars = signUpView.getConfirmPassword();
+        String password = new String(passwordChars);
+        String confirmPassword = new String(confirmPasswordChars);
+        Arrays.fill(passwordChars, '\0');
+        Arrays.fill(confirmPasswordChars, '\0');
+        signUpView.clearPasswords();
 
         if (!InputValidator.validateString(firstName) || !InputValidator.validateString(lastName)) {
             signUpView.showError("Vui lòng nhập đầy đủ họ và tên.");
