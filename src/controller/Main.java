@@ -172,10 +172,12 @@ public class Main {
         String adminName = formatAdminName(admin);
         MenuView menuView = new MenuView(adminName);
 
+        menuView.getBtnShowPackages().addActionListener(e -> new ShowAllPackages(packageRepo).execute());
         menuView.getBtnAddPackage().addActionListener(e -> new AddNewPackage(packageRepo).execute());
         menuView.getBtnUpdatePackage().addActionListener(e -> new UpdatePackage(packageRepo).execute());
         menuView.getBtnDeletePackage().addActionListener(e -> new DeletePackage(packageRepo).execute());
 
+        menuView.getBtnShowMembers().addActionListener(e -> new ShowAllMembers(userRepo).execute());
         menuView.getBtnAddMember().addActionListener(e -> new AddNewMember(userRepo).execute());
         menuView.getBtnUpdateMember().addActionListener(e -> new UpdateMember(userRepo).execute());
         menuView.getBtnDeleteMember().addActionListener(e -> new DeleteMember(userRepo).execute());

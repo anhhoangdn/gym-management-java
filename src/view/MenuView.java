@@ -12,9 +12,11 @@ public class MenuView extends JFrame {
     private static final String SECTION_MEMBER = "Quản lý Hội viên";
     private static final String SECTION_REGISTRATION = "Quản lý Đăng ký";
     private static final String SECTION_ACCOUNT = "Tài khoản Admin";
+    private static final String BTN_SHOW_PACKAGES = "Xem danh sách gói tập";
     private static final String BTN_ADD_PACKAGE = "Thêm gói tập";
     private static final String BTN_UPDATE_PACKAGE = "Cập nhật gói tập";
     private static final String BTN_DELETE_PACKAGE = "Xóa gói tập";
+    private static final String BTN_SHOW_MEMBERS = "Xem danh sách hội viên";
     private static final String BTN_ADD_MEMBER = "Thêm hội viên";
     private static final String BTN_UPDATE_MEMBER = "Cập nhật hội viên";
     private static final String BTN_DELETE_MEMBER = "Xóa hội viên";
@@ -27,9 +29,11 @@ public class MenuView extends JFrame {
     private static final String BTN_CHANGE_PASSWORD = "Đổi mật khẩu";
     private static final String BTN_LOGOUT = "Đăng xuất";
 
+    private JButton btnShowPackages;
     private JButton btnAddPackage;
     private JButton btnUpdatePackage;
     private JButton btnDeletePackage;
+    private JButton btnShowMembers;
     private JButton btnAddMember;
     private JButton btnUpdateMember;
     private JButton btnDeleteMember;
@@ -57,9 +61,11 @@ public class MenuView extends JFrame {
         JPanel headerPanel = UiTheme.createHeaderPanel(String.format(WELCOME_FORMAT, adminName), HEADER_SUBTITLE);
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
+        btnShowPackages  = UiTheme.createPrimaryButton(BTN_SHOW_PACKAGES);
         btnAddPackage    = UiTheme.createPrimaryButton(BTN_ADD_PACKAGE);
         btnUpdatePackage = UiTheme.createPrimaryButton(BTN_UPDATE_PACKAGE);
         btnDeletePackage = UiTheme.createPrimaryButton(BTN_DELETE_PACKAGE);
+        btnShowMembers   = UiTheme.createPrimaryButton(BTN_SHOW_MEMBERS);
         btnAddMember     = UiTheme.createPrimaryButton(BTN_ADD_MEMBER);
         btnUpdateMember  = UiTheme.createPrimaryButton(BTN_UPDATE_MEMBER);
         btnDeleteMember  = UiTheme.createPrimaryButton(BTN_DELETE_MEMBER);
@@ -76,9 +82,9 @@ public class MenuView extends JFrame {
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setOpaque(false);
 
-        contentPanel.add(buildSection(SECTION_PACKAGE, btnAddPackage, btnUpdatePackage, btnDeletePackage));
+        contentPanel.add(buildSection(SECTION_PACKAGE, btnShowPackages, btnAddPackage, btnUpdatePackage, btnDeletePackage));
         contentPanel.add(Box.createVerticalStrut(12));
-        contentPanel.add(buildSection(SECTION_MEMBER, btnAddMember, btnUpdateMember, btnDeleteMember));
+        contentPanel.add(buildSection(SECTION_MEMBER, btnShowMembers, btnAddMember, btnUpdateMember, btnDeleteMember));
         contentPanel.add(Box.createVerticalStrut(12));
         contentPanel.add(buildSection(SECTION_REGISTRATION, btnAddRegistration, btnRenewRegistration,
                 btnCancelRegistration, btnShowAllRegistrations, btnShowMemberRegistrations));
@@ -105,18 +111,20 @@ public class MenuView extends JFrame {
         return card;
     }
 
-    public JButton getBtnAddPackage()               { return btnAddPackage; }
-    public JButton getBtnUpdatePackage()            { return btnUpdatePackage; }
-    public JButton getBtnDeletePackage()            { return btnDeletePackage; }
-    public JButton getBtnAddMember()                { return btnAddMember; }
-    public JButton getBtnUpdateMember()             { return btnUpdateMember; }
-    public JButton getBtnDeleteMember()             { return btnDeleteMember; }
-    public JButton getBtnAddRegistration()          { return btnAddRegistration; }
-    public JButton getBtnRenewRegistration()        { return btnRenewRegistration; }
-    public JButton getBtnCancelRegistration()       { return btnCancelRegistration; }
-    public JButton getBtnShowAllRegistrations()     { return btnShowAllRegistrations; }
-    public JButton getBtnShowMemberRegistrations()  { return btnShowMemberRegistrations; }
-    public JButton getBtnEditUserData()             { return btnEditUserData; }
-    public JButton getBtnChangePassword()           { return btnChangePassword; }
-    public JButton getBtnLogout()                   { return btnLogout; }
+    public JButton getBtnShowPackages()           { return btnShowPackages; }
+    public JButton getBtnAddPackage()             { return btnAddPackage; }
+    public JButton getBtnUpdatePackage()          { return btnUpdatePackage; }
+    public JButton getBtnDeletePackage()          { return btnDeletePackage; }
+    public JButton getBtnShowMembers()            { return btnShowMembers; }
+    public JButton getBtnAddMember()              { return btnAddMember; }
+    public JButton getBtnUpdateMember()           { return btnUpdateMember; }
+    public JButton getBtnDeleteMember()           { return btnDeleteMember; }
+    public JButton getBtnAddRegistration()        { return btnAddRegistration; }
+    public JButton getBtnRenewRegistration()      { return btnRenewRegistration; }
+    public JButton getBtnCancelRegistration()     { return btnCancelRegistration; }
+    public JButton getBtnShowAllRegistrations()   { return btnShowAllRegistrations; }
+    public JButton getBtnShowMemberRegistrations() { return btnShowMemberRegistrations; }
+    public JButton getBtnEditUserData()           { return btnEditUserData; }
+    public JButton getBtnChangePassword()         { return btnChangePassword; }
+    public JButton getBtnLogout()                 { return btnLogout; }
 }
