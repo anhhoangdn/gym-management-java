@@ -14,11 +14,12 @@ import util.PasswordUtil;
 
 public class UserRepository extends BaseRepository {
 
+    // Tạo người dùng mới (Member hoặc Admin)
     public int createUser(User user) {
         String sql = "INSERT INTO users(firstName, lastName, email, phoneNumber, password, type) VALUES(?, ?, ?, ?, ?, ?)";
-
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
             ps.setString(1, user.getFirstName());
             ps.setString(2, user.getLastName());
             ps.setString(3, user.getEmail());
@@ -27,83 +28,57 @@ public class UserRepository extends BaseRepository {
             ps.setInt(6, user.getType());
             ps.executeUpdate();
 
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
             }
             return -1;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to create user", e);
-        }
-    }
-
-    public int createUser(User user, char[] rawPassword) {
-        String sql = "INSERT INTO users(firstName, lastName, email, phoneNumber, password, type) VALUES(?, ?, ?, ?, ?, ?)";
-
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, user.getFirstName());
-            ps.setString(2, user.getLastName());
-            ps.setString(3, user.getEmail());
-            ps.setString(4, user.getPhoneNumber());
-            ps.setString(5, PasswordUtil.hashPassword(rawPassword));
-            ps.setInt(6, user.getType());
-            ps.executeUpdate();
-
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
+        } catch (Exception e) {
+            System.out.println("Lỗi khi thêm user: " + e.getMessage());
+            e.printStackTrace();
             return -1;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to create user", e);
         }
     }
 
     public User findById(int id) {
         String sql = "SELECT id, firstName, lastName, email, phoneNumber, password, type FROM users WHERE id = ?";
-
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapUser(rs);
-                }
-                return null;
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapUser(rs);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to find user by id", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     public User findByEmail(String email) {
         String sql = "SELECT id, firstName, lastName, email, phoneNumber, password, type FROM users WHERE email = ?";
-
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, email);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapUser(rs);
-                }
-                return null;
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapUser(rs);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to find user by email", e);
+        } catch (Exception e) {
+            System.out.println("Lỗi tìm email: " + e.getMessage());
         }
+        return null;
     }
 
+    // Lấy danh sách thành viên
     public List<Member> findAllMembers() {
         String sql = "SELECT id, firstName, lastName, email, phoneNumber, password, type FROM users WHERE type = 1 ORDER BY id";
         List<Member> members = new ArrayList<>();
 
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql);
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-
+            
             while (rs.next()) {
                 members.add(new Member(
                         rs.getInt("id"),
@@ -115,18 +90,19 @@ public class UserRepository extends BaseRepository {
                         rs.getInt("type")
                 ));
             }
-            return members;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to list members", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return members;
     }
 
     public boolean updateUser(User user, boolean updatePassword) {
         String sqlWithoutPassword = "UPDATE users SET firstName = ?, lastName = ?, email = ?, phoneNumber = ?, type = ? WHERE id = ?";
         String sqlWithPassword = "UPDATE users SET firstName = ?, lastName = ?, email = ?, phoneNumber = ?, password = ?, type = ? WHERE id = ?";
 
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(updatePassword ? sqlWithPassword : sqlWithoutPassword)) {
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(updatePassword ? sqlWithPassword : sqlWithoutPassword)) {
+            
             ps.setString(1, user.getFirstName());
             ps.setString(2, user.getLastName());
             ps.setString(3, user.getEmail());
@@ -142,54 +118,55 @@ public class UserRepository extends BaseRepository {
             }
 
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to update user", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
     public boolean deleteUser(int id) {
         String sql = "DELETE FROM users WHERE id = ?";
-
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to delete user", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
-    public Admin authenticateAdmin(String email, char[] rawPassword) {
+    // Đăng nhập admin
+    public Admin authenticateAdmin(String email, String rawPassword) {
         String sql = "SELECT id, firstName, lastName, email, phoneNumber, password, type FROM users WHERE email = ? AND type = 0";
 
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setString(1, email);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    return null;
-                }
-
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
                 String storedPassword = rs.getString("password");
-                if (!PasswordUtil.verifyPassword(rawPassword, storedPassword)) {
-                    return null;
+                if (PasswordUtil.verifyPassword(rawPassword, storedPassword)) {
+                    return new Admin(
+                            rs.getInt("id"),
+                            rs.getString("firstName"),
+                            rs.getString("lastName"),
+                            rs.getString("email"),
+                            rs.getString("phoneNumber"),
+                            storedPassword,
+                            rs.getInt("type")
+                    );
                 }
-
-                return new Admin(
-                        rs.getInt("id"),
-                        rs.getString("firstName"),
-                        rs.getString("lastName"),
-                        rs.getString("email"),
-                        rs.getString("phoneNumber"),
-                        storedPassword,
-                        rs.getInt("type")
-                );
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to authenticate admin", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
+    // Hàm phụ dùng để map dữ liệu từ ResultSet sang Object
     private User mapUser(ResultSet rs) throws SQLException {
         int type = rs.getInt("type");
         if (type == 0) {
@@ -203,7 +180,6 @@ public class UserRepository extends BaseRepository {
                     type
             );
         }
-
         return new Member(
                 rs.getInt("id"),
                 rs.getString("firstName"),

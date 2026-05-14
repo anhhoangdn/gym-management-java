@@ -2,7 +2,6 @@ package controller;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import model.Admin;
@@ -46,7 +45,8 @@ public class Main {
         }
     }
 
-    private void showLogin(UserRepository userRepo, PackageRepository packageRepo, RegistrationRepository registrationRepo) {
+    private void showLogin(UserRepository userRepo, PackageRepository packageRepo,
+            RegistrationRepository registrationRepo) {
         LoginView loginView = new LoginView();
 
         loginView.getBtnLogin().addActionListener(
@@ -57,34 +57,28 @@ public class Main {
     }
 
     private void handleLogin(LoginView loginView, UserRepository userRepo,
-                             PackageRepository packageRepo, RegistrationRepository registrationRepo) {
+            PackageRepository packageRepo, RegistrationRepository registrationRepo) {
         String email = loginView.getEmail();
-        char[] passwordChars = loginView.getPassword();
+        String password = new String(loginView.getPassword());
 
-        try {
-            if (!InputValidator.validateEmail(email)) {
-                loginView.showError("Email không hợp lệ.");
-                return;
-            }
-            if (isBlank(passwordChars)) {
-                loginView.showError("Mật khẩu không được để trống.");
-                return;
-            }
-
-            Admin admin = userRepo.authenticateAdmin(email, passwordChars);
-            if (admin == null) {
-                loginView.showError("Sai email hoặc mật khẩu admin.");
-                return;
-            }
-
-            loginView.dispose();
-            openMenu(admin, userRepo, packageRepo, registrationRepo);
-        } finally {
-            if (passwordChars != null) {
-                Arrays.fill(passwordChars, '\0');
-            }
-            loginView.clearPassword();
+        if (!InputValidator.validateEmail(email)) {
+            loginView.showError("Email không hợp lệ.");
+            return;
         }
+        if (password.trim().isEmpty()) {
+            loginView.showError("Mật khẩu không được để trống.");
+            return;
+        }
+
+        Admin admin = userRepo.authenticateAdmin(email, password);
+        if (admin == null) {
+            loginView.showError("Sai email hoặc mật khẩu admin.");
+            loginView.clearPassword();
+            return;
+        }
+
+        loginView.dispose();
+        openMenu(admin, userRepo, packageRepo, registrationRepo);
     }
 
     private void openRegistration(LoginView loginView, UserRepository userRepo) {
@@ -102,8 +96,8 @@ public class Main {
         String lastName = signUpView.getLastName();
         String email = signUpView.getEmail();
         String phone = signUpView.getPhone();
-        char[] passwordChars = signUpView.getPassword();
-        char[] confirmPasswordChars = signUpView.getConfirmPassword();
+        String password = new String(signUpView.getPassword());
+        String confirmPassword = new String(signUpView.getConfirmPassword());
 
         try {
             if (!InputValidator.validateString(firstName) || !InputValidator.validateString(lastName)) {
@@ -118,19 +112,19 @@ public class Main {
                 signUpView.showError("Số điện thoại không hợp lệ (cần 9-11 chữ số).");
                 return;
             }
-            if (isBlank(passwordChars)) {
+            if (password.trim().isEmpty()) {
                 signUpView.showError("Mật khẩu không được để trống.");
                 return;
             }
-            if (passwordChars.length < 6) {
+            if (password.length() < 6) {
                 signUpView.showError("Mật khẩu phải có ít nhất 6 ký tự.");
                 return;
             }
-            if (isBlank(confirmPasswordChars)) {
+            if (confirmPassword.trim().isEmpty()) {
                 signUpView.showError("Vui lòng xác nhận mật khẩu.");
                 return;
             }
-            if (!Arrays.equals(passwordChars, confirmPasswordChars)) {
+            if (!password.equals(confirmPassword)) {
                 signUpView.showError("Xác nhận mật khẩu không khớp.");
                 return;
             }
@@ -144,8 +138,9 @@ public class Main {
             admin.setLastName(lastName);
             admin.setEmail(email);
             admin.setPhoneNumber(phone);
+            admin.setPassword(password); // Lưu tạm ở object để createUser dùng
 
-            int id = userRepo.createUser(admin, passwordChars);
+            int id = userRepo.createUser(admin);
             if (id > 0) {
                 signUpView.showMessage("Đăng ký thành công! Vui lòng đăng nhập.");
                 signUpView.dispose();
@@ -155,20 +150,13 @@ public class Main {
             } else {
                 signUpView.showError("Đã xảy ra lỗi khi tạo tài khoản admin.");
             }
-        } catch (RuntimeException ex) {
+        } catch (Exception ex) {
             signUpView.showError("Không thể tạo tài khoản: " + ex.getMessage());
-        } finally {
-            if (passwordChars != null) {
-                Arrays.fill(passwordChars, '\0');
-            }
-            if (confirmPasswordChars != null) {
-                Arrays.fill(confirmPasswordChars, '\0');
-            }
-            signUpView.clearPasswords();
         }
     }
 
-    private void openMenu(Admin admin, UserRepository userRepo, PackageRepository packageRepo, RegistrationRepository registrationRepo) {
+    private void openMenu(Admin admin, UserRepository userRepo, PackageRepository packageRepo,
+            RegistrationRepository registrationRepo) {
         String adminName = formatAdminName(admin);
         MenuView menuView = new MenuView(adminName);
 
@@ -176,11 +164,13 @@ public class Main {
         menuView.getBtnAddPackage().addActionListener(e -> new AddNewPackage(packageRepo).execute());
         menuView.getBtnUpdatePackage().addActionListener(e -> new UpdatePackage(packageRepo).execute());
         menuView.getBtnDeletePackage().addActionListener(e -> new DeletePackage(packageRepo).execute());
+        menuView.getBtnShowAllPackages().addActionListener(e -> new ShowAllPackages(packageRepo).execute());
 
         menuView.getBtnShowMembers().addActionListener(e -> new ShowAllMembers(userRepo).execute());
         menuView.getBtnAddMember().addActionListener(e -> new AddNewMember(userRepo).execute());
         menuView.getBtnUpdateMember().addActionListener(e -> new UpdateMember(userRepo).execute());
         menuView.getBtnDeleteMember().addActionListener(e -> new DeleteMember(userRepo).execute());
+        menuView.getBtnShowAllMembers().addActionListener(e -> new ShowAllMembers(userRepo).execute());
 
         menuView.getBtnAddRegistration().addActionListener(
                 e -> new AddNewRegistration(registrationRepo, userRepo, packageRepo).execute());
@@ -193,6 +183,9 @@ public class Main {
         menuView.getBtnShowMemberRegistrations().addActionListener(
                 e -> new ShowMemberRegistrations(registrationRepo, userRepo).execute());
 
+        menuView.getBtnShowStatistics().addActionListener(
+                e -> new ShowStatistics(userRepo, packageRepo, registrationRepo).execute());
+
         menuView.getBtnEditUserData().addActionListener(e -> new EditUserData(userRepo, admin).execute());
         menuView.getBtnChangePassword().addActionListener(e -> new ChangePassword(userRepo, admin).execute());
         menuView.getBtnLogout().addActionListener(e -> handleLogout(menuView, userRepo, packageRepo, registrationRepo));
@@ -201,7 +194,7 @@ public class Main {
     }
 
     private void handleLogout(MenuView menuView, UserRepository userRepo, PackageRepository packageRepo,
-                              RegistrationRepository registrationRepo) {
+            RegistrationRepository registrationRepo) {
         int confirm = JOptionPane.showConfirmDialog(
                 menuView,
                 "Bạn có chắc muốn đăng xuất?",
@@ -228,18 +221,6 @@ public class Main {
 
     private void showError(String message) {
         JOptionPane.showMessageDialog(null, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
-    }
-
-    private boolean isBlank(char[] value) {
-        if (value == null || value.length == 0) {
-            return true;
-        }
-        for (char c : value) {
-            if (!Character.isWhitespace(c)) {
-                return false;
-            }
-        }
-        return true;
     }
 
 }

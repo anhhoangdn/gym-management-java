@@ -11,11 +11,12 @@ import model.Registration;
 
 public class RegistrationRepository extends BaseRepository {
 
+    // Tạo đăng ký mới
     public int createRegistration(Registration registration) {
         String sql = "INSERT INTO registrations(userId, packageId, startDate, endDate, total, status) VALUES(?, ?, ?, ?, ?, ?)";
-
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
             ps.setInt(1, registration.getUserId());
             ps.setInt(2, registration.getPackageId());
             ps.setDate(3, new java.sql.Date(registration.getStartDate().getTime()));
@@ -24,73 +25,74 @@ public class RegistrationRepository extends BaseRepository {
             ps.setInt(6, registration.getStatus());
             ps.executeUpdate();
 
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
             }
-            return -1;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to create registration", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return -1;
     }
 
+    // Tìm đăng ký theo id
     public Registration findById(int id) {
         String sql = "SELECT id, userId, packageId, startDate, endDate, total, status FROM registrations WHERE id = ?";
-
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapRegistration(rs);
-                }
-                return null;
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapRegistration(rs);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to find registration by id", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
+    // Lấy tất cả đăng ký
     public List<Registration> findAll() {
         String sql = "SELECT id, userId, packageId, startDate, endDate, total, status FROM registrations ORDER BY id";
         List<Registration> registrations = new ArrayList<>();
-
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql);
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+            
             while (rs.next()) {
                 registrations.add(mapRegistration(rs));
             }
-            return registrations;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to list registrations", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return registrations;
     }
 
+    // Tìm đăng ký theo user
     public List<Registration> findByUserId(int userId) {
         String sql = "SELECT id, userId, packageId, startDate, endDate, total, status FROM registrations WHERE userId = ? ORDER BY id";
         List<Registration> registrations = new ArrayList<>();
-
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    registrations.add(mapRegistration(rs));
-                }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                registrations.add(mapRegistration(rs));
             }
-            return registrations;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to list registrations by userId", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return registrations;
     }
 
+    // Cập nhật thông tin đăng ký
     public boolean updateRegistration(Registration registration) {
         String sql = "UPDATE registrations SET userId = ?, packageId = ?, startDate = ?, endDate = ?, total = ?, status = ? WHERE id = ?";
-
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setInt(1, registration.getUserId());
             ps.setInt(2, registration.getPackageId());
             ps.setDate(3, new java.sql.Date(registration.getStartDate().getTime()));
@@ -99,46 +101,53 @@ public class RegistrationRepository extends BaseRepository {
             ps.setInt(6, registration.getStatus());
             ps.setInt(7, registration.getId());
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to update registration", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
+    // Gia hạn gói tập
     public boolean renewRegistration(int id, java.util.Date newEndDate, double newTotal) {
         String sql = "UPDATE registrations SET endDate = ?, total = ?, status = 1 WHERE id = ?";
-
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setDate(1, new java.sql.Date(newEndDate.getTime()));
             ps.setDouble(2, newTotal);
             ps.setInt(3, id);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to renew registration", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
+    // Hủy đăng ký
     public boolean cancelRegistration(int id) {
         String sql = "UPDATE registrations SET status = 0 WHERE id = ?";
-
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to cancel registration", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
+    // Xóa đăng ký
     public boolean deleteRegistration(int id) {
         String sql = "DELETE FROM registrations WHERE id = ?";
-
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to delete registration", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

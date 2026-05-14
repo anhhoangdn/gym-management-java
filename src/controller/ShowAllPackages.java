@@ -1,11 +1,11 @@
 package controller;
 
 import java.util.List;
-import javax.swing.table.DefaultTableModel;
 import model.Package;
 import repository.PackageRepository;
 import util.Operation;
 import view.PackageView;
+import javax.swing.table.DefaultTableModel;
 
 public class ShowAllPackages implements Operation {
 
@@ -21,21 +21,18 @@ public class ShowAllPackages implements Operation {
         DefaultTableModel model = view.getTableModel();
         model.setRowCount(0);
 
-        List<Package> packages = packageRepo.findAll();
-        for (Package gymPackage : packages) {
+        List<Package> list = packageRepo.findAll();
+
+        for (Package pkg : list) {
             Object[] row = {
-                    gymPackage.getId(),
-                    valueOrEmpty(gymPackage.getPackageName()),
-                    gymPackage.getDuration(),
-                    gymPackage.getPrice(),
-                    valueOrEmpty(gymPackage.getDescription()),
-                    gymPackage.getStatusLabel()
+                pkg.getId(),
+                pkg.getPackageName(),
+                pkg.getDuration(),
+                pkg.getPrice(),
+                pkg.getDescription(),
+                pkg.getStatus() == 1 ? "Active" : "Inactive"
             };
             model.addRow(row);
         }
-    }
-
-    private String valueOrEmpty(String value) {
-        return value == null ? "" : value;
     }
 }
