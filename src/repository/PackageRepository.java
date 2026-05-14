@@ -11,11 +11,12 @@ import model.Package;
 
 public class PackageRepository extends BaseRepository {
 
+    // Thêm gói tập mới
     public int createPackage(Package gymPackage) {
         String sql = "INSERT INTO packages(packageName, duration, price, description, status) VALUES(?, ?, ?, ?, ?)";
-
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
             ps.setString(1, gymPackage.getPackageName());
             ps.setInt(2, gymPackage.getDuration());
             ps.setDouble(3, gymPackage.getPrice());
@@ -23,71 +24,73 @@ public class PackageRepository extends BaseRepository {
             ps.setInt(5, gymPackage.getStatus());
             ps.executeUpdate();
 
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
             }
-            return -1;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to create package", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return -1;
     }
 
+    // Tìm theo ID
     public Package findById(int id) {
         String sql = "SELECT id, packageName, duration, price, description, status FROM packages WHERE id = ?";
-
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapPackage(rs);
-                }
-                return null;
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapPackage(rs);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to find package by id", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
+    // Lấy tất cả gói tập
     public List<Package> findAll() {
         String sql = "SELECT id, packageName, duration, price, description, status FROM packages ORDER BY id";
         List<Package> packages = new ArrayList<>();
-
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql);
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+            
             while (rs.next()) {
                 packages.add(mapPackage(rs));
             }
-            return packages;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to list packages", e);
+        } catch (Exception e) {
+            System.out.println("Lỗi lấy danh sách package: " + e.getMessage());
         }
+        return packages;
     }
 
+    // Lấy gói tập đang hoạt động
     public List<Package> findActivePackages() {
         String sql = "SELECT id, packageName, duration, price, description, status FROM packages WHERE status = 1 ORDER BY id";
         List<Package> packages = new ArrayList<>();
-
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql);
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+            
             while (rs.next()) {
                 packages.add(mapPackage(rs));
             }
-            return packages;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to list active packages", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return packages;
     }
 
+    // Cập nhật thông tin gói
     public boolean updatePackage(Package gymPackage) {
         String sql = "UPDATE packages SET packageName = ?, duration = ?, price = ?, description = ?, status = ? WHERE id = ?";
-
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setString(1, gymPackage.getPackageName());
             ps.setInt(2, gymPackage.getDuration());
             ps.setDouble(3, gymPackage.getPrice());
@@ -95,33 +98,37 @@ public class PackageRepository extends BaseRepository {
             ps.setInt(5, gymPackage.getStatus());
             ps.setInt(6, gymPackage.getId());
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to update package", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
     public boolean updatePackageStatus(int id, int status) {
         String sql = "UPDATE packages SET status = ? WHERE id = ?";
-
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setInt(1, status);
             ps.setInt(2, id);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to update package status", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
+    // Xóa gói tập
     public boolean deletePackage(int id) {
         String sql = "DELETE FROM packages WHERE id = ?";
-
-           try (Connection con = getConnection();
-               PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to delete package", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
