@@ -10,7 +10,6 @@ import repository.RegistrationRepository;
 import repository.UserRepository;
 import view.LoginView;
 import view.MenuView;
-import view.SignUpView;
 import util.DatabaseConnection;
 import util.InputValidator;
 
@@ -51,7 +50,6 @@ public class Main {
 
         loginView.getBtnLogin().addActionListener(
                 e -> handleLogin(loginView, userRepo, packageRepo, registrationRepo));
-        loginView.getBtnRegister().addActionListener(e -> openRegistration(loginView, userRepo));
 
         loginView.setVisible(true);
     }
@@ -81,111 +79,23 @@ public class Main {
         openMenu(admin, userRepo, packageRepo, registrationRepo);
     }
 
-    private void openRegistration(LoginView loginView, UserRepository userRepo) {
-        SignUpView signUpView = new SignUpView();
-
-        signUpView.getBtnCancel().addActionListener(e -> signUpView.dispose());
-        signUpView.getBtnConfirm().addActionListener(
-                e -> handleRegistration(signUpView, loginView, userRepo));
-
-        signUpView.setVisible(true);
-    }
-
-    private void handleRegistration(SignUpView signUpView, LoginView loginView, UserRepository userRepo) {
-        String firstName = signUpView.getFirstName();
-        String lastName = signUpView.getLastName();
-        String email = signUpView.getEmail();
-        String phone = signUpView.getPhone();
-        String password = new String(signUpView.getPassword());
-        String confirmPassword = new String(signUpView.getConfirmPassword());
-
-        try {
-            if (!InputValidator.validateString(firstName) || !InputValidator.validateString(lastName)) {
-                signUpView.showError("Vui lòng nhập đầy đủ họ và tên.");
-                return;
-            }
-            if (!InputValidator.validateEmail(email)) {
-                signUpView.showError("Email không hợp lệ.");
-                return;
-            }
-            if (!InputValidator.validatePhoneNumber(phone)) {
-                signUpView.showError("Số điện thoại không hợp lệ (cần 9-11 chữ số).");
-                return;
-            }
-            if (password.trim().isEmpty()) {
-                signUpView.showError("Mật khẩu không được để trống.");
-                return;
-            }
-            if (password.length() < 6) {
-                signUpView.showError("Mật khẩu phải có ít nhất 6 ký tự.");
-                return;
-            }
-            if (confirmPassword.trim().isEmpty()) {
-                signUpView.showError("Vui lòng xác nhận mật khẩu.");
-                return;
-            }
-            if (!password.equals(confirmPassword)) {
-                signUpView.showError("Xác nhận mật khẩu không khớp.");
-                return;
-            }
-            if (userRepo.findByEmail(email) != null) {
-                signUpView.showError("Email này đã được sử dụng. Vui lòng chọn email khác.");
-                return;
-            }
-
-            Admin admin = new Admin();
-            admin.setFirstName(firstName);
-            admin.setLastName(lastName);
-            admin.setEmail(email);
-            admin.setPhoneNumber(phone);
-            admin.setPassword(password); // Lưu tạm ở object để createUser dùng
-
-            int id = userRepo.createUser(admin);
-            if (id > 0) {
-                signUpView.showMessage("Đăng ký thành công! Vui lòng đăng nhập.");
-                signUpView.dispose();
-                loginView.setEmail(email);
-                loginView.clearPassword();
-                loginView.focusPassword();
-            } else {
-                signUpView.showError("Đã xảy ra lỗi khi tạo tài khoản admin.");
-            }
-        } catch (Exception ex) {
-            signUpView.showError("Không thể tạo tài khoản: " + ex.getMessage());
-        }
-    }
-
     private void openMenu(Admin admin, UserRepository userRepo, PackageRepository packageRepo,
             RegistrationRepository registrationRepo) {
         String adminName = formatAdminName(admin);
         MenuView menuView = new MenuView(adminName);
 
+        // 4 module chính - mỗi controller là singleton để tránh chồng cửa sổ
+        MemberManagement memberMgmt = new MemberManagement(userRepo, registrationRepo);
+        PackageManagement packageMgmt = new PackageManagement(packageRepo);
+        RegistrationManagement registrationMgmt = new RegistrationManagement(registrationRepo, userRepo, packageRepo);
+        ShowStatistics statistics = new ShowStatistics(userRepo, packageRepo, registrationRepo);
 
-        menuView.getBtnAddPackage().addActionListener(e -> new AddNewPackage(packageRepo).execute());
-        menuView.getBtnUpdatePackage().addActionListener(e -> new UpdatePackage(packageRepo).execute());
-        menuView.getBtnDeletePackage().addActionListener(e -> new DeletePackage(packageRepo).execute());
-        menuView.getBtnShowAllPackages().addActionListener(e -> new ShowAllPackages(packageRepo).execute());
+        menuView.getBtnManageMembers().addActionListener(e -> memberMgmt.execute());
+        menuView.getBtnManagePackages().addActionListener(e -> packageMgmt.execute());
+        menuView.getBtnManageRegistrations().addActionListener(e -> registrationMgmt.execute());
+        menuView.getBtnShowStatistics().addActionListener(e -> statistics.execute());
 
-
-        menuView.getBtnAddMember().addActionListener(e -> new AddNewMember(userRepo).execute());
-        menuView.getBtnUpdateMember().addActionListener(e -> new UpdateMember(userRepo).execute());
-        menuView.getBtnDeleteMember().addActionListener(e -> new DeleteMember(userRepo).execute());
-        menuView.getBtnShowAllMembers().addActionListener(e -> new ShowAllMembers(userRepo).execute());
-
-        menuView.getBtnAddRegistration().addActionListener(
-                e -> new AddNewRegistration(registrationRepo, userRepo, packageRepo).execute());
-        menuView.getBtnRenewRegistration().addActionListener(
-                e -> new RenewRegistration(registrationRepo, packageRepo).execute());
-        menuView.getBtnCancelRegistration().addActionListener(
-                e -> new CancelRegistration(registrationRepo).execute());
-        menuView.getBtnShowAllRegistrations().addActionListener(
-                e -> new ShowAllRegistrations(registrationRepo, userRepo).execute());
-        menuView.getBtnShowMemberRegistrations().addActionListener(
-                e -> new ShowMemberRegistrations(registrationRepo, userRepo).execute());
-
-        menuView.getBtnShowStatistics().addActionListener(
-                e -> new ShowStatistics(userRepo, packageRepo, registrationRepo).execute());
-
+        // Tài khoản admin
         menuView.getBtnEditUserData().addActionListener(e -> new EditUserData(userRepo, admin).execute());
         menuView.getBtnChangePassword().addActionListener(e -> new ChangePassword(userRepo, admin).execute());
         menuView.getBtnLogout().addActionListener(e -> handleLogout(menuView, userRepo, packageRepo, registrationRepo));

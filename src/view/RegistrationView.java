@@ -1,181 +1,112 @@
 package view;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
+/**
+ * Khung quản lý Đăng ký: bảng + tìm theo tên/email hội viên + nút Add/Renew/Delete.
+ */
 public class RegistrationView extends JFrame {
 
-    private JTextField txtRegistrationId;
-    private JTextField txtUserId;
-    private JTextField txtPackageId;
-    private JTextField txtStartDate;
-    private JButton btnConfirm;
-    private JButton btnCancel;
-    private JTable table;
-    private DefaultTableModel tableModel;
+    public static final String SEARCH_FIELD_NAME = "name";
+    public static final String SEARCH_FIELD_EMAIL = "email";
 
-    public static RegistrationView showAllList() {
-        RegistrationView view = new RegistrationView("Tất cả đăng ký gói tập", "all");
-        view.setVisible(true);
-        return view;
-    }
+    private final JRadioButton rbName;
+    private final JRadioButton rbEmail;
+    private final JTextField txtSearch;
+    private final JButton btnSearch;
+    private final JButton btnReload;
+    private final JTable table;
+    private final DefaultTableModel tableModel;
+    private final JButton btnAdd;
+    private final JButton btnRenew;
+    private final JButton btnDelete;
+    private final JButton btnClose;
 
-    public static RegistrationView showMemberList() {
-        RegistrationView view = new RegistrationView("Đăng ký theo Hội viên", "member");
-        view.setVisible(true);
-        return view;
-    }
-
-    public static RegistrationView showAddForm() {
-        RegistrationView view = new RegistrationView("Tạo đăng ký mới", "add");
-        view.setVisible(true);
-        return view;
-    }
-
-    public static RegistrationView showRenewForm() {
-        RegistrationView view = new RegistrationView("Gia hạn đăng ký", "renew");
-        view.setVisible(true);
-        return view;
-    }
-
-    public static RegistrationView showCancelForm() {
-        RegistrationView view = new RegistrationView("Hủy đăng ký", "cancel");
-        view.setVisible(true);
-        return view;
-    }
-
-    private RegistrationView(String title, String mode) {
-        setTitle(title);
-        setSize(860, 560);
+    public RegistrationView() {
+        setTitle("Quản lý Đăng ký");
+        setSize(960, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel mainPanel = UiTheme.createPagePanel();
+        mainPanel.add(UiTheme.createHeaderPanel("Quản lý Đăng ký",
+                "Tìm theo tên hoặc email hội viên. Chọn 1 đăng ký để Gia hạn / Xóa."),
+                BorderLayout.NORTH);
 
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-        headerPanel.setOpaque(false);
-        headerPanel.add(UiTheme.createHeaderPanel(title, buildSubtitle(mode)));
-        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        JPanel card = UiTheme.createCardPanel(new BorderLayout(0, 12));
 
-        switch (mode) {
-            case "all":
-                buildTable();
-                mainPanel.add(UiTheme.createScrollPane(table), BorderLayout.CENTER);
-                break;
-            case "member":
-                buildTable();
-                JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
-                searchPanel.setOpaque(false);
-                searchPanel.add(UiTheme.createLabel("ID Hội viên:"));
-                txtUserId  = UiTheme.createTextField();
-                txtUserId.setColumns(UiTheme.SEARCH_FIELD_COLUMNS);
-                btnConfirm = UiTheme.createPrimaryButton("Tìm");
-                searchPanel.add(txtUserId);
-                searchPanel.add(btnConfirm);
-                headerPanel.add(Box.createVerticalStrut(10));
-                headerPanel.add(searchPanel);
-                mainPanel.add(UiTheme.createScrollPane(table), BorderLayout.CENTER);
-                break;
-            case "add":
-                JPanel addForm = UiTheme.createFormPanel();
-                txtUserId = UiTheme.createTextField();
-                UiTheme.addFormRow(addForm, 0, "ID Hội viên:", txtUserId);
-                txtPackageId = UiTheme.createTextField();
-                UiTheme.addFormRow(addForm, 1, "ID Gói tập:", txtPackageId);
-                txtStartDate = UiTheme.createTextField();
-                UiTheme.addFormRow(addForm, 2, "Ngày bắt đầu (yyyy-MM-dd):", txtStartDate);
-                mainPanel.add(buildFormWithButtons(addForm), BorderLayout.CENTER);
-                break;
-            case "renew":
-                JPanel renewForm = UiTheme.createFormPanel();
-                txtRegistrationId = UiTheme.createTextField();
-                UiTheme.addFormRow(renewForm, 0, "ID Đăng ký:", txtRegistrationId);
-                txtPackageId = UiTheme.createTextField();
-                UiTheme.addFormRow(renewForm, 1, "ID Gói tập:", txtPackageId);
-                mainPanel.add(buildFormWithButtons(renewForm), BorderLayout.CENTER);
-                break;
-            case "cancel":
-                JPanel simpleForm = UiTheme.createFormPanel();
-                txtRegistrationId = UiTheme.createTextField();
-                UiTheme.addFormRow(simpleForm, 0, "ID Đăng ký:", txtRegistrationId);
-                mainPanel.add(buildFormWithButtons(simpleForm), BorderLayout.CENTER);
-                break;
-        }
+        // Thanh tìm
+        JPanel searchBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        searchBar.setOpaque(false);
+        searchBar.add(UiTheme.createLabel("Tìm hội viên theo:"));
+        rbName = new JRadioButton("Tên", true);
+        rbEmail = new JRadioButton("Email");
+        rbName.setOpaque(false);
+        rbEmail.setOpaque(false);
+        ButtonGroup group = new ButtonGroup();
+        group.add(rbName);
+        group.add(rbEmail);
+        searchBar.add(rbName);
+        searchBar.add(rbEmail);
+        txtSearch = UiTheme.createTextField();
+        txtSearch.setColumns(UiTheme.SEARCH_FIELD_COLUMNS + 8);
+        searchBar.add(txtSearch);
+        btnSearch = UiTheme.createPrimaryButton("Tìm");
+        btnReload = UiTheme.createSecondaryButton("Tải lại");
+        searchBar.add(btnSearch);
+        searchBar.add(btnReload);
+        card.add(searchBar, BorderLayout.NORTH);
 
-        add(mainPanel);
-    }
-
-    private void buildTable() {
-        String[] columns = new String[]{"ID", "ID Hội viên", "Tên hội viên", "Gói tập", "Ngày bắt đầu", "Ngày kết thúc", "Tổng tiền", "Trạng thái"};
+        // Bảng
+        String[] columns = {"ID", "Hội viên", "Email", "Gói tập", "Bắt đầu", "Kết thúc", "Tổng (VNĐ)", "Trạng thái"};
         tableModel = new DefaultTableModel(columns, 0) {
+            @Override
             public boolean isCellEditable(int r, int c) { return false; }
         };
         table = new JTable(tableModel);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         UiTheme.styleTable(table);
-        centerMemberColumns();
+        card.add(UiTheme.createScrollPane(table), BorderLayout.CENTER);
+
+        // Nút thao tác
+        btnAdd = UiTheme.createPrimaryButton("+ Đăng ký mới");
+        btnRenew = UiTheme.createPrimaryButton("Gia hạn đăng ký đã chọn");
+        btnDelete = UiTheme.createDangerButton("Xóa đăng ký đã chọn");
+        btnClose = UiTheme.createSecondaryButton("Đóng");
+        card.add(UiTheme.createButtonBar(btnAdd, btnRenew, btnDelete, btnClose), BorderLayout.SOUTH);
+
+        mainPanel.add(card, BorderLayout.CENTER);
+        add(mainPanel);
+
+        txtSearch.addActionListener(e -> btnSearch.doClick());
+        btnClose.addActionListener(e -> dispose());
     }
 
-    private void centerMemberColumns() {
-        centerColumn(1);
-        centerColumn(2);
-    }
-
-    private void centerColumn(int columnIndex) {
-        if (table == null || table.getColumnCount() <= columnIndex) {
-            return;
-        }
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        table.getColumnModel().getColumn(columnIndex).setCellRenderer(centerRenderer);
-
-        JTableHeader header = table.getTableHeader();
-        DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer();
-        headerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        headerRenderer.setFont(header.getFont());
-        headerRenderer.setBackground(header.getBackground());
-        headerRenderer.setForeground(header.getForeground());
-        headerRenderer.setOpaque(true);
-        table.getColumnModel().getColumn(columnIndex).setHeaderRenderer(headerRenderer);
-    }
-
-    private JPanel buildFormWithButtons(JPanel formPanel) {
-        btnConfirm = UiTheme.createPrimaryButton("Xác nhận");
-        btnCancel  = UiTheme.createSecondaryButton("Hủy");
-
-        JPanel wrapper = UiTheme.createCardPanel(new BorderLayout(0, 14));
-        wrapper.add(formPanel, BorderLayout.CENTER);
-        wrapper.add(UiTheme.createButtonBar(btnConfirm, btnCancel), BorderLayout.SOUTH);
-        return wrapper;
-    }
-
-    private String buildSubtitle(String mode) {
-        switch (mode) {
-            case "member":
-                return "Tra cứu đăng ký theo từng hội viên.";
-            case "add":
-                return "Tạo mới đăng ký gói tập cho hội viên.";
-            case "renew":
-                return "Gia hạn gói tập dựa trên ID đăng ký và ID gói tập.";
-            case "cancel":
-                return "Hủy đăng ký gói tập khi cần thiết.";
-            default:
-                return "Tổng quan toàn bộ đăng ký hiện có.";
-        }
-    }
-
-    public String getRegistrationId() { return txtRegistrationId != null ? txtRegistrationId.getText().trim() : ""; }
-    public String getUserId()         { return txtUserId != null ? txtUserId.getText().trim() : ""; }
-    public String getPackageId()      { return txtPackageId != null ? txtPackageId.getText().trim() : ""; }
-    public String getStartDate()      { return txtStartDate != null ? txtStartDate.getText().trim() : ""; }
-    public JButton getBtnConfirm()    { return btnConfirm; }
-    public JButton getBtnCancel()     { return btnCancel; }
-    public JTable  getTable()         { return table; }
+    public String getSearchKeyword() { return txtSearch.getText().trim(); }
+    public String getSearchField() { return rbEmail.isSelected() ? SEARCH_FIELD_EMAIL : SEARCH_FIELD_NAME; }
     public DefaultTableModel getTableModel() { return tableModel; }
+    public JTable getTable() { return table; }
+
+    public int getSelectedRegistrationId() {
+        int row = table.getSelectedRow();
+        if (row < 0) return -1;
+        Object value = tableModel.getValueAt(row, 0);
+        if (value instanceof Integer) return (Integer) value;
+        try { return Integer.parseInt(value.toString()); } catch (Exception ex) { return -1; }
+    }
+
+    public void onSearch(ActionListener listener) { btnSearch.addActionListener(listener); }
+    public void onReload(ActionListener listener) { btnReload.addActionListener(listener); }
+    public void onAdd(ActionListener listener) { btnAdd.addActionListener(listener); }
+    public void onRenew(ActionListener listener) { btnRenew.addActionListener(listener); }
+    public void onDelete(ActionListener listener) { btnDelete.addActionListener(listener); }
 
     public void showMessage(String msg) { JOptionPane.showMessageDialog(this, msg); }
-    public void showError(String msg)   { JOptionPane.showMessageDialog(this, msg, "Lỗi", JOptionPane.ERROR_MESSAGE); }
+    public void showError(String msg) { JOptionPane.showMessageDialog(this, msg, "Lỗi", JOptionPane.ERROR_MESSAGE); }
+    public boolean confirm(String msg, String title) {
+        return JOptionPane.showConfirmDialog(this, msg, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+    }
 }

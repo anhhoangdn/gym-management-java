@@ -95,6 +95,25 @@ public class Registration {
         return status == 1 ? "ACTIVE" : "CANCELLED";
     }
 
+    /** Đăng ký đã hết hạn theo thời gian thực (endDate < hôm nay). */
+    public boolean isExpired() {
+        if (endDate == null) {
+            return false;
+        }
+        java.time.LocalDate end = new java.sql.Date(endDate.getTime()).toLocalDate();
+        return end.isBefore(java.time.LocalDate.now());
+    }
+
+    /** Active hiệu lực = chưa hết hạn (đăng ký đã hủy thì admin xóa hẳn rồi). */
+    public boolean isEffectivelyActive() {
+        return !isExpired();
+    }
+
+    /** Nhãn hiển thị: ACTIVE / HẾT HẠN. */
+    public String getEffectiveStatusLabel() {
+        return isExpired() ? "HẾT HẠN" : "ACTIVE";
+    }
+
     @Override
     public String toString() {
         return "Registration{" +

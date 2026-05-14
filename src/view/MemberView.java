@@ -3,126 +3,113 @@ package view;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
+/**
+ * Khung quản lý Hội viên: 1 bảng + thanh tìm + 4 nút thao tác.
+ * Add/Edit dùng MemberFormDialog (modal).
+ */
 public class MemberView extends JFrame {
 
-    private JTextField txtId;
-    private JTextField txtFirstName;
-    private JTextField txtLastName;
-    private JTextField txtEmail;
-    private JTextField txtPhone;
-    private JPasswordField txtPassword;
-    private JButton btnConfirm;
-    private JButton btnCancel;
-    private JTable table;
-    private DefaultTableModel tableModel;
+    public static final String SEARCH_FIELD_NAME = "name";
+    public static final String SEARCH_FIELD_EMAIL = "email";
 
-    public static MemberView showList() {
-        MemberView view = new MemberView("Danh sách Hội viên", false, false);
-        view.setVisible(true);
-        return view;
-    }
+    private final JRadioButton rbName;
+    private final JRadioButton rbEmail;
+    private final JTextField txtSearch;
+    private final JButton btnSearch;
+    private final JButton btnReload;
+    private final JTable table;
+    private final DefaultTableModel tableModel;
+    private final JButton btnAdd;
+    private final JButton btnEdit;
+    private final JButton btnDelete;
+    private final JButton btnClose;
 
-    public static MemberView showAddForm() {
-        MemberView view = new MemberView("Thêm Hội viên mới", true, false);
-        view.setVisible(true);
-        return view;
-    }
-
-    public static MemberView showEditForm() {
-        MemberView view = new MemberView("Cập nhật Hội viên", true, true);
-        view.setVisible(true);
-        return view;
-    }
-
-    public static MemberView showDeleteForm() {
-        MemberView view = new MemberView("Xóa Hội viên", false, true);
-        view.setVisible(true);
-        return view;
-    }
-
-    private MemberView(String title, boolean showFullForm, boolean showIdField) {
-        setTitle(title);
-        setSize(740, 520);
+    public MemberView() {
+        setTitle("Quản lý Hội viên");
+        setSize(820, 580);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel mainPanel = UiTheme.createPagePanel();
-        mainPanel.add(UiTheme.createHeaderPanel(title, buildSubtitle(showFullForm, showIdField)), BorderLayout.NORTH);
+        mainPanel.add(UiTheme.createHeaderPanel("Quản lý Hội viên",
+                "Tìm kiếm, thêm, sửa, xóa hội viên."), BorderLayout.NORTH);
 
-        if (showFullForm || showIdField) {
-            JPanel formPanel = UiTheme.createFormPanel();
-            int row = 0;
-            if (showIdField) {
-                txtId = UiTheme.createTextField();
-                UiTheme.addFormRow(formPanel, row++, "ID Hội viên:", txtId);
-            }
-            if (showFullForm) {
-                txtFirstName = UiTheme.createTextField();
-                UiTheme.addFormRow(formPanel, row++, "Họ:", txtFirstName);
+        JPanel card = UiTheme.createCardPanel(new BorderLayout(0, 12));
 
-                txtLastName = UiTheme.createTextField();
-                UiTheme.addFormRow(formPanel, row++, "Tên:", txtLastName);
+        // Thanh tìm kiếm
+        JPanel searchBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        searchBar.setOpaque(false);
+        searchBar.add(UiTheme.createLabel("Tìm theo:"));
+        rbName = new JRadioButton("Tên", true);
+        rbEmail = new JRadioButton("Email");
+        rbName.setOpaque(false);
+        rbEmail.setOpaque(false);
+        ButtonGroup group = new ButtonGroup();
+        group.add(rbName);
+        group.add(rbEmail);
+        searchBar.add(rbName);
+        searchBar.add(rbEmail);
+        txtSearch = UiTheme.createTextField();
+        txtSearch.setColumns(UiTheme.SEARCH_FIELD_COLUMNS + 8);
+        searchBar.add(txtSearch);
+        btnSearch = UiTheme.createPrimaryButton("Tìm");
+        btnReload = UiTheme.createSecondaryButton("Tải lại");
+        searchBar.add(btnSearch);
+        searchBar.add(btnReload);
+        card.add(searchBar, BorderLayout.NORTH);
 
-                txtEmail = UiTheme.createTextField();
-                UiTheme.addFormRow(formPanel, row++, "Email:", txtEmail);
+        // Bảng
+        String[] columns = {"ID", "Họ", "Tên", "Email", "Số điện thoại"};
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+        table = new JTable(tableModel);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        UiTheme.styleTable(table);
+        card.add(UiTheme.createScrollPane(table), BorderLayout.CENTER);
 
-                txtPhone = UiTheme.createTextField();
-                UiTheme.addFormRow(formPanel, row++, "Số điện thoại:", txtPhone);
+        // Thanh nút thao tác
+        btnAdd = UiTheme.createPrimaryButton("+ Thêm mới");
+        btnEdit = UiTheme.createPrimaryButton("Sửa người đã chọn");
+        btnDelete = UiTheme.createDangerButton("Xóa người đã chọn");
+        btnClose = UiTheme.createSecondaryButton("Đóng");
+        JPanel actionBar = UiTheme.createButtonBar(btnAdd, btnEdit, btnDelete, btnClose);
+        card.add(actionBar, BorderLayout.SOUTH);
 
-                txtPassword = UiTheme.createPasswordField();
-                UiTheme.addFormRow(formPanel, row++, "Mật khẩu:", txtPassword);
-            }
-            btnConfirm = UiTheme.createPrimaryButton("Xác nhận");
-            btnCancel  = UiTheme.createSecondaryButton("Hủy");
-
-            JPanel card = UiTheme.createCardPanel(new BorderLayout(0, 14));
-            card.add(formPanel, BorderLayout.CENTER);
-            card.add(UiTheme.createButtonBar(btnConfirm, btnCancel), BorderLayout.SOUTH);
-            mainPanel.add(card, BorderLayout.CENTER);
-
-        } else {
-            String[] columns = {"ID", "Họ", "Tên", "Email", "Số điện thoại"};
-            tableModel = new DefaultTableModel(columns, 0) {
-                public boolean isCellEditable(int r, int c) { return false; }
-            };
-            table = new JTable(tableModel);
-            UiTheme.styleTable(table);
-            mainPanel.add(UiTheme.createScrollPane(table), BorderLayout.CENTER);
-        }
-
+        mainPanel.add(card, BorderLayout.CENTER);
         add(mainPanel);
+
+        // Enter trong ô tìm = bấm Tìm
+        txtSearch.addActionListener(e -> btnSearch.doClick());
+        btnClose.addActionListener(e -> dispose());
     }
 
-    private String buildSubtitle(boolean showFullForm, boolean showIdField) {
-        if (showFullForm) {
-            return "Nhập thông tin hội viên để hoàn tất thao tác.";
-        }
-        if (showIdField) {
-            return "Nhập ID hội viên cần thao tác.";
-        }
-        return "Danh sách hội viên hiện tại trong hệ thống.";
-    }
-
-    public String getMemberId()     { return txtId != null ? txtId.getText().trim() : ""; }
-    public String getFirstName()    { return txtFirstName != null ? txtFirstName.getText().trim() : ""; }
-    public String getLastName()     { return txtLastName != null ? txtLastName.getText().trim() : ""; }
-    public String getEmail()        { return txtEmail != null ? txtEmail.getText().trim() : ""; }
-    public String getPhone()        { return txtPhone != null ? txtPhone.getText().trim() : ""; }
-    public String getPassword()     { return txtPassword != null ? new String(txtPassword.getPassword()).trim() : ""; }
-    public JButton getBtnConfirm()  { return btnConfirm; }
-    public JButton getBtnCancel()   { return btnCancel; }
-    public JTable  getTable()       { return table; }
+    public String getSearchKeyword() { return txtSearch.getText().trim(); }
+    public String getSearchField() { return rbEmail.isSelected() ? SEARCH_FIELD_EMAIL : SEARCH_FIELD_NAME; }
     public DefaultTableModel getTableModel() { return tableModel; }
+    public JTable getTable() { return table; }
 
-    public void fillForm(String id, String firstName, String lastName, String email, String phone) {
-        if (txtId != null)        txtId.setText(id);
-        if (txtFirstName != null) txtFirstName.setText(firstName);
-        if (txtLastName != null)  txtLastName.setText(lastName);
-        if (txtEmail != null)     txtEmail.setText(email);
-        if (txtPhone != null)     txtPhone.setText(phone);
+    public int getSelectedRow() { return table.getSelectedRow(); }
+    public int getSelectedMemberId() {
+        int row = table.getSelectedRow();
+        if (row < 0) return -1;
+        Object value = tableModel.getValueAt(row, 0);
+        if (value instanceof Integer) return (Integer) value;
+        try { return Integer.parseInt(value.toString()); } catch (Exception ex) { return -1; }
     }
+
+    public void onSearch(ActionListener listener) { btnSearch.addActionListener(listener); }
+    public void onReload(ActionListener listener) { btnReload.addActionListener(listener); }
+    public void onAdd(ActionListener listener) { btnAdd.addActionListener(listener); }
+    public void onEdit(ActionListener listener) { btnEdit.addActionListener(listener); }
+    public void onDelete(ActionListener listener) { btnDelete.addActionListener(listener); }
 
     public void showMessage(String msg) { JOptionPane.showMessageDialog(this, msg); }
-    public void showError(String msg)   { JOptionPane.showMessageDialog(this, msg, "Lỗi", JOptionPane.ERROR_MESSAGE); }
+    public void showError(String msg) { JOptionPane.showMessageDialog(this, msg, "Lỗi", JOptionPane.ERROR_MESSAGE); }
+    public boolean confirm(String msg, String title) {
+        return JOptionPane.showConfirmDialog(this, msg, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+    }
 }

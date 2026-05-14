@@ -8,7 +8,6 @@ public class LoginView extends JFrame {
     private JTextField txtEmail;
     private JPasswordField txtPassword;
     private JButton btnLogin;
-    private JButton btnRegister;
 
     public LoginView() {
         setTitle("Gym Management - Đăng nhập");
@@ -34,12 +33,11 @@ public class LoginView extends JFrame {
         card.add(formPanel, BorderLayout.CENTER);
 
         btnLogin = UiTheme.createPrimaryButton("Đăng nhập");
-        btnRegister = UiTheme.createSecondaryButton("Tạo tài khoản");
 
         JPanel footer = new JPanel();
         footer.setLayout(new BoxLayout(footer, BoxLayout.Y_AXIS));
         footer.setOpaque(false);
-        footer.add(UiTheme.createButtonBar(btnLogin, btnRegister));
+        footer.add(UiTheme.createButtonBar(btnLogin));
         footer.add(Box.createVerticalStrut(10));
 
         JLabel demoLabel = new JLabel("Demo admin: admin@gym.com / admin123");
@@ -77,10 +75,6 @@ public class LoginView extends JFrame {
 
     public JButton getBtnLogin() {
         return btnLogin;
-    }
-
-    public JButton getBtnRegister() {
-        return btnRegister;
     }
 
     public void showMessage(String msg) {

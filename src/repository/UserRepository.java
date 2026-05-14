@@ -70,6 +70,54 @@ public class UserRepository extends BaseRepository {
         return null;
     }
 
+    // Tìm hội viên theo tên hoặc email (LIKE %kw%). field = "name" | "email"
+    public List<Member> searchMembers(String field, String keyword) {
+        String safeKeyword = keyword == null ? "" : keyword.trim();
+        if (safeKeyword.isEmpty()) {
+            return findAllMembers();
+        }
+
+        String pattern = "%" + safeKeyword + "%";
+        String sql;
+        if ("email".equalsIgnoreCase(field)) {
+            sql = "SELECT id, firstName, lastName, email, phoneNumber, password, type FROM users " +
+                  "WHERE type = 1 AND email LIKE ? ORDER BY id";
+        } else {
+            sql = "SELECT id, firstName, lastName, email, phoneNumber, password, type FROM users " +
+                  "WHERE type = 1 AND (firstName LIKE ? OR lastName LIKE ? " +
+                  "OR CONCAT(firstName, ' ', lastName) LIKE ?) ORDER BY id";
+        }
+
+        List<Member> members = new ArrayList<>();
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            if ("email".equalsIgnoreCase(field)) {
+                ps.setString(1, pattern);
+            } else {
+                ps.setString(1, pattern);
+                ps.setString(2, pattern);
+                ps.setString(3, pattern);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                members.add(new Member(
+                        rs.getInt("id"),
+                        rs.getString("firstName"),
+                        rs.getString("lastName"),
+                        rs.getString("email"),
+                        rs.getString("phoneNumber"),
+                        rs.getString("password"),
+                        rs.getInt("type")
+                ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return members;
+    }
+
     // Lấy danh sách thành viên
     public List<Member> findAllMembers() {
         String sql = "SELECT id, firstName, lastName, email, phoneNumber, password, type FROM users WHERE type = 1 ORDER BY id";
