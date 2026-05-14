@@ -22,8 +22,8 @@ public class DatabaseConnection {
         Map<String, String> envValues = loadEnvFile();
         String driver = resolveSetting("DB_DRIVER", envValues, DEFAULT_DRIVER);
         String url = requireSetting("DB_URL", envValues);
-        String user = requireSetting("DB_USER", envValues);
-        String password = requireSetting("DB_PASSWORD", envValues);
+        String user = resolveSetting("DB_USER", envValues, "");
+        String password = resolveSetting("DB_PASSWORD", envValues, "");
 
         try {
             Class.forName(driver);
