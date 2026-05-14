@@ -163,10 +163,12 @@ public class Main {
         menuView.getBtnAddPackage().addActionListener(e -> new AddNewPackage(packageRepo).execute());
         menuView.getBtnUpdatePackage().addActionListener(e -> new UpdatePackage(packageRepo).execute());
         menuView.getBtnDeletePackage().addActionListener(e -> new DeletePackage(packageRepo).execute());
+        menuView.getBtnShowAllPackages().addActionListener(e -> new ShowAllPackages(packageRepo).execute());
 
         menuView.getBtnAddMember().addActionListener(e -> new AddNewMember(userRepo).execute());
         menuView.getBtnUpdateMember().addActionListener(e -> new UpdateMember(userRepo).execute());
         menuView.getBtnDeleteMember().addActionListener(e -> new DeleteMember(userRepo).execute());
+        menuView.getBtnShowAllMembers().addActionListener(e -> new ShowAllMembers(userRepo).execute());
 
         menuView.getBtnAddRegistration().addActionListener(
                 e -> new AddNewRegistration(registrationRepo, userRepo, packageRepo).execute());
@@ -178,6 +180,9 @@ public class Main {
                 e -> new ShowAllRegistrations(registrationRepo, userRepo).execute());
         menuView.getBtnShowMemberRegistrations().addActionListener(
                 e -> new ShowMemberRegistrations(registrationRepo, userRepo).execute());
+
+        menuView.getBtnShowStatistics().addActionListener(
+                e -> new ShowStatistics(userRepo, packageRepo, registrationRepo).execute());
 
         menuView.getBtnEditUserData().addActionListener(e -> new EditUserData(userRepo, admin).execute());
         menuView.getBtnChangePassword().addActionListener(e -> new ChangePassword(userRepo, admin).execute());

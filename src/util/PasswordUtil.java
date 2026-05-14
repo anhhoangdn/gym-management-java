@@ -30,8 +30,15 @@ public final class PasswordUtil {
         if (rawPassword == null || storedPassword == null)
             return false;
 
-        // hash mk người dùng nhập và so sánh với db
+        // Xử lý tương thích ngược với mật khẩu cũ (có tiền tố sha256$ do AI cũ tạo)
+        if (storedPassword.startsWith("sha256$")) {
+            String hash = hashPassword(rawPassword);
+            return hash != null && storedPassword.substring(7).equals(hash);
+        }
+
+        // Tương thích với pass chưa hash (plain text) hoặc pass mới đã hash (ko có tiền
+        // tố)
         String hashed = hashPassword(rawPassword);
-        return hashed != null && hashed.equals(storedPassword);
+        return rawPassword.equals(storedPassword) || (hashed != null && hashed.equals(storedPassword));
     }
 }
