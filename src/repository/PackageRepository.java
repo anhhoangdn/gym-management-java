@@ -68,6 +68,28 @@ public class PackageRepository extends BaseRepository {
         return packages;
     }
 
+    // Tìm gói theo tên (LIKE %kw%)
+    public List<Package> searchByName(String keyword) {
+        String safeKeyword = keyword == null ? "" : keyword.trim();
+        if (safeKeyword.isEmpty()) {
+            return findAll();
+        }
+        String sql = "SELECT id, packageName, duration, price, description, status FROM packages " +
+                     "WHERE packageName LIKE ? ORDER BY id";
+        List<Package> packages = new ArrayList<>();
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, "%" + safeKeyword + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                packages.add(mapPackage(rs));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return packages;
+    }
+
     // Lấy gói tập đang hoạt động
     public List<Package> findActivePackages() {
         String sql = "SELECT id, packageName, duration, price, description, status FROM packages WHERE status = 1 ORDER BY id";
@@ -97,34 +119,6 @@ public class PackageRepository extends BaseRepository {
             ps.setString(4, gymPackage.getDescription());
             ps.setInt(5, gymPackage.getStatus());
             ps.setInt(6, gymPackage.getId());
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean updatePackageStatus(int id, int status) {
-        String sql = "UPDATE packages SET status = ? WHERE id = ?";
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            
-            ps.setInt(1, status);
-            ps.setInt(2, id);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // Xóa gói tập
-    public boolean deletePackage(int id) {
-        String sql = "DELETE FROM packages WHERE id = ?";
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            
-            ps.setInt(1, id);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
